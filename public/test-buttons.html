@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Button Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <h1>Button Test</h1>
+
+    <button type="button"
+            data-action="view-details"
+            data-copy-trade-id="1"
+            style="padding: 10px; margin: 10px; background: blue; color: white;">
+        Test Details Button
+    </button>
+
+    <button type="button"
+            data-action="stop-copy"
+            data-copy-trade-id="1"
+            data-expert-name="Test Expert"
+            style="padding: 10px; margin: 10px; background: red; color: white;">
+        Test Stop Button
+    </button>
+
+    <script>
+        console.log('Test page loaded');
+
+        // Test if SweetAlert2 is loaded
+        if (typeof Swal !== 'undefined') {
+            console.log('SweetAlert2 is loaded');
+        } else {
+            console.error('SweetAlert2 is not loaded');
+        }
+
+        document.addEventListener('click', function(event) {
+            const button = event.target.closest('button[data-action]');
+            if (!button) return;
+
+            const action = button.getAttribute('data-action');
+            const copyTradeId = button.getAttribute('data-copy-trade-id');
+
+            console.log('Button clicked:', action, 'ID:', copyTradeId);
+
+            if (action === 'view-details') {
+                alert('Details button works! ID: ' + copyTradeId);
+            } else if (action === 'stop-copy') {
+                const expertName = button.getAttribute('data-expert-name');
+                alert('Stop button works! ID: ' + copyTradeId + ', Expert: ' + expertName);
+            }
+        });
+    </script>
+</body>
+</html>

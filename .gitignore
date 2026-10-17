@@ -1,0 +1,31 @@
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env.backup
+.phpunit.result.cache
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/.idea
+/.vscode
+# Environment secrets
+.env
+.env.*
+!.env.example
+# Local databases and backups
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.sql.gz
+*.sql.zip
+# Runtime and temporary files
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/temp/

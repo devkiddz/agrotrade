@@ -1,0 +1,14 @@
+# Protect the cron setup file from direct access
+# Uncomment these lines after you've set up your cron job
+#<Files "cron-setup.php">
+#  Order Allow,Deny
+#  Deny from all
+#</Files>
+
+# Allow the update scripts to be accessed only with the correct key
+<Files ~ "run-(market|crypto)-update\.php$">
+  # If no key is provided, deny access
+  RewriteEngine On
+  RewriteCond %{QUERY_STRING} !key=
+  RewriteRule ^ - [F,L]
+</Files>
