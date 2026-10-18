@@ -54,6 +54,13 @@ class AutoTaskController extends Controller
 
     public function autotopup()
     {
+        // Phase 1B-F0: fail closed if another financial run holds the cache lock.
+        $agrotradeRunLock = \Illuminate\Support\Facades\Cache::lock('agrotrade:financial:legacy-cron', 7200);
+        if (!$agrotradeRunLock->get()) {
+            \Illuminate\Support\Facades\Log::warning('Agrotrade financial cron overlapping run blocked: autotopup');
+            return response()->json(['success' => false, 'message' => 'Financial processing already running'], 409);
+        }
+        try {
         // automatic roi for investment plans
         $this->automaticRoi();
 
@@ -68,6 +75,9 @@ class AutoTaskController extends Controller
 
         // check for subscription expiration
 
+        } finally {
+            $agrotradeRunLock->release();
+        }
     }
 
     /**
@@ -76,305 +86,168 @@ class AutoTaskController extends Controller
     public function automaticRoi()
     {
         $settings = Settings::find(1);
+        if (!$settings || $settings->trade_mode != 'on') return;
 
-        if ($settings->trade_mode == 'on') {
-            //get user investment plans
-            $usersPlans = Investment::where('active', 'yes')->get();
+        $ids = Investment::where('active', 'yes')->pluck('id');
+        foreach ($ids as $id) {
+            $completionMail = null;
+            try {
+                \Illuminate\Support\Facades\DB::transaction(function () use ($id, $settings, &$completionMail) {
+                    $plan = Investment::whereKey($id)->lockForUpdate()->first();
+                    if (!$plan || $plan->active !== 'yes') return;
+                    // Phase 1C: row lock serializes admin controls with ROI settlement.
+                    if (!\Illuminate\Support\Facades\Schema::hasTable('agrotrade_investment_controls')) return;
+                    if (\Illuminate\Support\Facades\DB::table('agrotrade_investment_controls')->where('investment_type', 'legacy')->where('investment_id', $plan->id)->where('state', '!=', 'active')->exists()) return;
+                    $dplan = Plans::find($plan->plan);
+                    if (!$dplan) return;
+                    $user = User::whereKey($plan->user)->lockForUpdate()->first();
+                    if (!$user) return;
+                    $now = now();
+                    // Preserve the original interval and payout formulas.
+                    $last = $plan->last_growth->copy();
+                    if ($dplan->increment_interval == 'Monthly') $nextDrop = $last->addDays(25);
+                    elseif ($dplan->increment_interval == 'Weekly') $nextDrop = $last->addDays(6);
+                    elseif ($dplan->increment_interval == 'Daily') $nextDrop = $last->addHours(20);
+                    elseif ($dplan->increment_interval == 'Hourly') $nextDrop = $last->addMinutes(49);
+                    elseif ($dplan->increment_interval == 'Every 30 Minutes') $nextDrop = $last->addMinutes(25);
+                    else $nextDrop = $last->addMinutes(10);
 
-            //get current date and time to be used for calculations of ROI
-            $now = now();
-
-            //logic to add auto roi
-            foreach ($usersPlans as $plan) {
-                //get plan
-                $dplan = Plans::firstWhere('id', $plan->plan);
-                if (!$dplan) continue; // Skip if plan doesn't exist
-
-                //get user
-                $user = User::firstWhere('id', $plan->user);
-                if (!$user) continue; // Skip if user doesn't exist
-
-                //know the plan increment interval
-                if ($dplan->increment_interval == "Monthly") {
-                    $nextDrop = $plan->last_growth->addDays(25);
-                } elseif ($dplan->increment_interval == "Weekly") {
-                    $nextDrop = $plan->last_growth->addDays(6);
-                } elseif ($dplan->increment_interval == "Daily") {
-                    $nextDrop = $plan->last_growth->addHours(20);
-                } elseif ($dplan->increment_interval == "Hourly") {
-                    $nextDrop = $plan->last_growth->addMinutes(49);
-                } elseif ($dplan->increment_interval == "Every 30 Minutes") {
-                    $nextDrop = $plan->last_growth->addMinutes(25);
-                } else {
-                    $nextDrop = $plan->last_growth->addMinutes(10);
-                }
-
-                //conditions
-                $condition = $now->lessThanOrEqualTo($plan->expire_date) && $user->trade_mode == 'on';
-                $condition2 = $now->greaterThan($plan->expire_date);
-
-                //calculate increment
-                if ($dplan->increment_type == "Percentage") {
-                    $increment = (floatval($plan->amount) * floatval($dplan->increment_amount)) / 100;
-                } else {
-                    $increment = floatval($dplan->increment_amount);
-                }
-
-                if ($condition) {
-                    if ($now->isWeekday() or $settings->weekend_trade == 'on') {
-                        if ($now->greaterThanOrEqualTo($nextDrop)) {
-
-                            User::where('id', $plan->user)
-                                ->update([
-                                    'roi' => $user->roi + $increment,
-                                    'account_bal' => $user->account_bal + $increment,
-
-                                ]);
-
-                            //save to transactions history
+                    if ($now->greaterThan($plan->expire_date)) {
+                        if ($settings->return_capital) {
+                            User::whereKey($user->id)->increment('account_bal', $plan->amount);
                             $th = new Tp_Transaction();
                             $th->plan = $dplan->name;
                             $th->user = $user->id;
-                            $th->amount = $increment;
+                            $th->amount = $plan->amount;
                             $th->user_plan_id = $plan->id;
-                            $th->type = "ROI";
+                            $th->type = 'Investment capital';
                             $th->save();
-
-                            Investment::where('id', $plan->id)
-                                ->update([
-                                    'last_growth' => $nextDrop,
-                                     'profit_earned' => $plan->profit_earned + $increment,
-                                ]);
-
-                            // Create in-app notification for ROI earnings
-                            $this->createUserNotification(
-                                $user->id,
-                                'ROI Earnings Received',
-                                "You have received a return of {$user->currency}{$increment} from your investment in {$dplan->name}.",
-                                'success',
-                                $th->id,
-                                'Tp_Transaction'
-                            );
-
-                            // if ($user->sendroiemail == 'Yes') {
-                            //     //send email notification
-                            //     $date = Carbon::now()->toDateTimeString();
-                            //     Mail::to($user->email)->send(new NewRoi($user, $dplan->name, $increment, $date, 'New Return on Investment(ROI)'));
-                            // }
                         }
+                        $plan->active = 'expired';
+                        $plan->save();
+                        $this->createUserNotification($user->id, 'Investment Plan Completed',
+                            "Your investment plan '{$dplan->name}' has been completed. Total profit earned: {$user->currency}{$plan->profit_earned}",
+                            'info', $plan->id, 'Investment');
+                        if ($user->sendinvplanemail == 'Yes') {
+                            $completionMail = [
+                                'email' => $user->email, 'name' => $user->name,
+                                'currency' => $user->currency, 'amount' => $plan->amount,
+                                'plan' => $dplan->name, 'site' => $settings->site_name,
+                            ];
+                        }
+                        return;
                     }
-                    if ($now->isWeekend() and $settings->weekend_trade != 'on') {
-                        if ($now->greaterThanOrEqualTo($nextDrop)) {
-                            Investment::where('id', $plan->id)
-                                ->update([
-                                    'last_growth' => $nextDrop,
-                                ]);
-                        }
+                    if ($user->trade_mode != 'on' || $now->lessThan($nextDrop)) return;
+                    if ($now->isWeekend() && $settings->weekend_trade != 'on') {
+                        $plan->last_growth = $nextDrop;
+                        $plan->save();
+                        return;
+                    }
+                    $increment = $dplan->increment_type == 'Percentage'
+                        ? (floatval($plan->amount) * floatval($dplan->increment_amount)) / 100
+                        : floatval($dplan->increment_amount);
+                    User::whereKey($user->id)->increment('roi', $increment);
+                    User::whereKey($user->id)->increment('account_bal', $increment);
+                    $th = new Tp_Transaction();
+                    $th->plan = $dplan->name;
+                    $th->user = $user->id;
+                    $th->amount = $increment;
+                    $th->user_plan_id = $plan->id;
+                    $th->type = 'ROI';
+                    $th->save();
+                    $plan->last_growth = $nextDrop;
+                    $plan->profit_earned = $plan->profit_earned + $increment;
+                    $plan->save();
+                    $this->createUserNotification($user->id, 'ROI Earnings Received',
+                        "You have received a return of {$user->currency}{$increment} from your investment in {$dplan->name}.",
+                        'success', $th->id, 'Tp_Transaction');
+                }, 3);
+                if ($completionMail) {
+                    try {
+                        $obj = new \stdClass();
+                        $obj->receiver_email = $completionMail['email'];
+                        $obj->receiver_plan = $completionMail['plan'];
+                        $obj->received_amount = $completionMail['currency'] . $completionMail['amount'];
+                        $obj->sender = $completionMail['site'];
+                        $obj->receiver_name = $completionMail['name'];
+                        $obj->date = Carbon::now();
+                        $obj->subject = 'Investment plan closed';
+                        Mail::to($completionMail['email'])->send(new endplan($obj));
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::error('Investment completion email failed: ' . $e->getMessage());
                     }
                 }
-
-                if ($condition2) {
-                    //release capital
-                    if ($settings->return_capital) {
-                        User::where('id', $plan->user)
-                            ->update([
-                                'account_bal' => $user->account_bal + $plan->amount,
-                            ]);
-
-                        //save to transactions history
-                        $th = new Tp_transaction();
-                        $th->plan = $dplan->name;
-                        $th->user = $plan->user;
-                        $th->amount = $plan->amount;
-                        $th->type = "Investment capital";
-                        $th->save();
-                    }
-
-                    //plan expired
-                    Investment::where('id', $plan->id)
-                        ->update([
-                            'active' => "expired",
-                        ]);
-
-                    // Create in-app notification for plan expiration
-                    $this->createUserNotification(
-                        $user->id,
-                        'Investment Plan Completed',
-                        "Your investment plan '{$dplan->name}' has been completed. Total profit earned: {$user->currency}{$plan->profit_earned}",
-                        'info',
-                        $plan->id,
-                        'Investment'
-                    );
-
-                    if ($user->sendinvplanemail == "Yes") {
-                        //send email notification
-                        $objDemo = new \stdClass();
-                        $objDemo->receiver_email = $user->email;
-                        $objDemo->receiver_plan = $dplan->name;
-                        $objDemo->received_amount = "$user->currency$plan->amount";
-                        $objDemo->sender = $settings->site_name;
-                        $objDemo->receiver_name = $user->name;
-                        $objDemo->date = \Carbon\Carbon::Now();
-                        $objDemo->subject = "Investment plan closed";
-
-                        try {
-                            Mail::to($user->email)->send(new endplan($objDemo));
-                        } catch (\Exception $e) {
-                            \Log::error('Failed to send investment plan completion email. User: ' . $user->name . ' (' . $user->email . '), Plan: ' . $dplan->name . ', Investment ID: ' . $plan->id . '. Error: ' . $e->getMessage());
-                        }
-                    }
-                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Legacy ROI processing failed for investment ' . $id . ': ' . $e->getMessage());
+                throw $e; // Stop the batch: never silently report financial processing as successful.
             }
         }
     }
 
     /**
-     * Calculate and distribute automatic trading profits for User_plans (trading)
+     * Settle each matured trade atomically; its active-state transition is the replay guard.
      */
     public function automaticTradingProfit()
     {
         $settings = Settings::find(1);
-
-        if ($settings->trade_mode == 'on') {
-            // Get active trading plans (User_plans)
-            $tradingPlans = User_plans::where('active', 'yes')->get();
-            $now = now();
-
-            foreach ($tradingPlans as $trade) {
-                // Get user
-                $user = User::firstWhere('id', $trade->user);
-                if (!$user) continue;
-
-                // Check if trade has expired
-                $tradeExpired = $now->greaterThan($trade->expire_date);
-                $tradeActive = $now->lessThanOrEqualTo($trade->expire_date) && $user->trade_mode == 'on';
-
-                if ($tradeExpired) {
-                    // Generate random profit/loss based on market conditions and leverage
+        if (!$settings || $settings->trade_mode != 'on') return;
+        $ids = User_plans::where('active', 'yes')->pluck('id');
+        foreach ($ids as $id) {
+            $mailData = null;
+            try {
+                \Illuminate\Support\Facades\DB::transaction(function () use ($id, &$mailData) {
+                    $trade = User_plans::whereKey($id)->lockForUpdate()->first();
+                    if (!$trade || $trade->active !== 'yes' || !now()->greaterThan($trade->expire_date)) return;
+                    $user = User::whereKey($trade->user)->lockForUpdate()->first();
+                    if (!$user) return;
                     $profitResult = $this->calculateTradingResult($trade);
-
-                    // Update user ROI based on trading result
                     if ($profitResult['result'] == 'WIN') {
                         $profit = (floatval($trade->amount) * floatval($profitResult['percentage'])) / 100;
-
-                        User::where('id', $trade->user)
-                            ->update([
-                                'roi' => $user->roi + $profit,
-                                'account_bal' => $user->account_bal + $trade->amount + $profit, // Return capital + profit
-                            ]);
-
-                        // Update user_plans profit_earned column
-                        User_plans::where('id', $trade->id)
-                            ->update([
-                                'profit_earned' => ($trade->profit_earned ?? 0) + $profit,
-                            ]);
-
-                        // Save transaction history
-                        Tp_Transaction::create([
-                            'user' => $user->id,
-                            'plan' => $trade->assets,
-                            'amount' => $profit,
-                            'type' => 'WIN',
-                            'leverage' => $profitResult['percentage'],
-                        ]);
-
-                        // Return capital transaction
-                        Tp_Transaction::create([
-                            'user' => $user->id,
-                            'plan' => $trade->assets,
-                            'amount' => $trade->amount,
-                            'type' => 'Trading capital return',
-                            'leverage' => 0,
-                        ]);
-
-                    } else {
-                        // LOSE - Calculate loss based on leverage and market movement
-                        $actualLoss = (floatval($trade->amount) * floatval($profitResult['loss_percentage'])) / 100;
-                        $refundAmount = floatval($trade->amount) - $actualLoss;
-
-                        // Update user_plans profit_earned column with negative loss
-                        User_plans::where('id', $trade->id)
-                            ->update([
-                                'profit_earned' => ($trade->profit_earned ?? 0) - $actualLoss,
-                            ]);
-
-                        // Refund the remaining amount to user account
-                        if ($refundAmount > 0) {
-                            User::where('id', $trade->user)
-                                ->update([
-                                    'account_bal' => $user->account_bal + $refundAmount,
-                                ]);
-
-                            // Record refund transaction
-                            Tp_Transaction::create([
-                                'user' => $user->id,
-                                'plan' => $trade->assets,
-                                'amount' => $refundAmount,
-                                'type' => 'Trading capital refund',
-                                'leverage' => 0,
-                            ]);
-                        }
-
-                        // Record loss transaction
-                        Tp_Transaction::create([
-                            'user' => $user->id,
-                            'plan' => $trade->assets,
-                            'amount' => $actualLoss,
-                            'type' => 'LOSE',
-                            'leverage' => $profitResult['loss_percentage'],
-                        ]);
-                    }
-
-                    // Mark trade as expired
-                    User_plans::where('id', $trade->id)
-                        ->update([
-                            'active' => 'expired',
-                        ]);
-
-                    // Update user trade status
-                    User::where('id', $trade->user)
-                        ->update([
-                            'trade' => 0,
-                        ]);
-
-                    // Create in-app notification based on trading result
-                    if ($profitResult['result'] == 'WIN') {
-                        $profit = (floatval($trade->amount) * floatval($profitResult['percentage'])) / 100;
-
-                        $this->createUserNotification(
-                            $user->id,
-                            'Trading Profit Generated',
+                        User::whereKey($user->id)->increment('roi', $profit);
+                        User::whereKey($user->id)->increment('account_bal', $trade->amount + $profit);
+                        $trade->profit_earned = ($trade->profit_earned ?? 0) + $profit;
+                        Tp_Transaction::create(['user' => $user->id, 'plan' => $trade->assets,
+                            'amount' => $profit, 'type' => 'WIN', 'leverage' => $profitResult['percentage']]);
+                        Tp_Transaction::create(['user' => $user->id, 'plan' => $trade->assets,
+                            'amount' => $trade->amount, 'type' => 'Trading capital return', 'leverage' => 0]);
+                        $this->createUserNotification($user->id, 'Trading Profit Generated',
                             "Your {$trade->assets} trade has completed successfully with a profit of {$user->currency}{$profit} ({$profitResult['percentage']}%).",
-                            'success',
-                            $trade->id,
-                            'User_plans'
-                        );
+                            'success', $trade->id, 'User_plans');
                     } else {
                         $actualLoss = (floatval($trade->amount) * floatval($profitResult['loss_percentage'])) / 100;
                         $refundAmount = floatval($trade->amount) - $actualLoss;
-
-                        $this->createUserNotification(
-                            $user->id,
-                            'Trading Loss',
-                            "Your {$trade->assets} trade resulted in a {$profitResult['loss_percentage']}% loss ({$user->currency}{$actualLoss}). Due to leverage protection, {$user->currency}{$refundAmount} has been refunded to your account.",
-                            'warning',
-                            $trade->id,
-                            'User_plans'
-                        );
-                    }
-
-                    // Send notification email if enabled
-                    if ($user->sendroiemail == 'Yes') {
-                        $message = "Your {$trade->assets} trade has been completed with a {$profitResult['result']} result.";
-                        $subject = "Trading Result: {$profitResult['result']}";
-
-                        try {
-                            Mail::to($user->email)->send(new NewNotification($message, $subject, $user->name));
-                        } catch (\Exception $e) {
-                            \Log::error('Failed to send trading result notification email. User: ' . $user->name . ' (' . $user->email . '), Trade ID: ' . $trade->id . ', Asset: ' . $trade->assets . ', Result: ' . $profitResult['result'] . '. Error: ' . $e->getMessage());
+                        $trade->profit_earned = ($trade->profit_earned ?? 0) - $actualLoss;
+                        if ($refundAmount > 0) {
+                            User::whereKey($user->id)->increment('account_bal', $refundAmount);
+                            Tp_Transaction::create(['user' => $user->id, 'plan' => $trade->assets,
+                                'amount' => $refundAmount, 'type' => 'Trading capital refund', 'leverage' => 0]);
                         }
+                        Tp_Transaction::create(['user' => $user->id, 'plan' => $trade->assets,
+                            'amount' => $actualLoss, 'type' => 'LOSE', 'leverage' => $profitResult['loss_percentage']]);
+                        $this->createUserNotification($user->id, 'Trading Loss',
+                            "Your {$trade->assets} trade resulted in a {$profitResult['loss_percentage']}% loss ({$user->currency}{$actualLoss}). Due to leverage protection, {$user->currency}{$refundAmount} has been refunded to your account.",
+                            'warning', $trade->id, 'User_plans');
+                    }
+                    $trade->active = 'expired';
+                    $trade->save();
+                    $user->trade = 0;
+                    $user->save();
+                    if ($user->sendroiemail == 'Yes') {
+                        $mailData = ['email' => $user->email, 'name' => $user->name,
+                            'message' => "Your {$trade->assets} trade has been completed with a {$profitResult['result']} result.",
+                            'subject' => "Trading Result: {$profitResult['result']}"];
+                    }
+                }, 3);
+                if ($mailData) {
+                    try {
+                        Mail::to($mailData['email'])->send(new NewNotification($mailData['message'], $mailData['subject'], $mailData['name']));
+                    } catch (\Throwable $e) {
+                        \Illuminate\Support\Facades\Log::error('Trading settlement email failed: ' . $e->getMessage());
                     }
                 }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Trading settlement failed for trade ' . $id . ': ' . $e->getMessage());
+                throw $e;
             }
         }
     }

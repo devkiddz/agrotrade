@@ -27,8 +27,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('update:crypto')->everyTenMinutes();
-        $schedule->command('update:market')->everyTenMinutes();
+        $schedule->command('update:crypto')->everyTenMinutes()->withoutOverlapping(30);
+        $schedule->command('update:market')->everyTenMinutes()->withoutOverlapping(30);
         // $schedule->command('market:prices')->everyFiveMinutes();
         // $schedule->command('copytrade:generate-profits')->everyThirtyMinutes();
 

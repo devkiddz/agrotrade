@@ -35,10 +35,19 @@ Route::get('/current-language', [LanguageController::class, 'getCurrentLanguage'
 
 
 //cron url
-Route::get('/cron', [AutoTaskController::class, 'autotopup'])->name('cron');
+Route::get('/cron', function (\Illuminate\Http\Request $request, AutoTaskController $controller) {
+    $configured = config('services.cron.key');
+    $provided = $request->query('key');
+    if (!is_string($configured) || strlen($configured) < 24 || !is_string($provided) || !hash_equals($configured, $provided)) {
+        abort(403, 'Unauthorized');
+    }
+    return $controller->autotopup();
+})->name('cron');
 
 Route::get('/run-crypto-update', function () {
-    if (request('key') !== env('CRON_KEY')) {
+    $configured = config('services.cron.key');
+    $provided = request()->query('key');
+    if (!is_string($configured) || strlen($configured) < 24 || !is_string($provided) || !hash_equals($configured, $provided)) {
         abort(403, 'Unauthorized');
     }
 
@@ -49,7 +58,9 @@ Route::get('/run-crypto-update', function () {
 
 
 Route::get('/run-market-update', function () {
-    if (request('key') !== env('CRON_KEY')) {
+    $configured = config('services.cron.key');
+    $provided = request()->query('key');
+    if (!is_string($configured) || strlen($configured) < 24 || !is_string($provided) || !hash_equals($configured, $provided)) {
         abort(403, 'Unauthorized');
     }
 
@@ -59,7 +70,9 @@ Route::get('/run-market-update', function () {
 
 Route::get('/fetchMarket', function () {
     // Optional: protect with a secret token
-    if (request('key') !== env('CRON_KEY')) {
+    $configured = config('services.cron.key');
+    $provided = request()->query('key');
+    if (!is_string($configured) || strlen($configured) < 24 || !is_string($provided) || !hash_equals($configured, $provided)) {
         abort(403, 'Unauthorized');
     }
 
@@ -70,7 +83,14 @@ Route::get('/fetchMarket', function () {
 // Route::get('/cron/bulk-bot-trades/{trades?}', [AutoTaskController::class, 'generateBulkBotTrades'])->name('cron.bulk.bot.trades');
 
 //new plan system cron url
-Route::get('/cron/roi', [AutoRoiController::class, 'processAutomaticRoi'])->name('cron.roi');
+Route::get('/cron/roi', function (\Illuminate\Http\Request $request, AutoRoiController $controller) {
+    $configured = config('services.cron.key');
+    $provided = $request->query('key');
+    if (!is_string($configured) || strlen($configured) < 24 || !is_string($provided) || !hash_equals($configured, $provided)) {
+        abort(403, 'Unauthorized');
+    }
+    return $controller->processAutomaticRoi();
+})->name('cron.roi');
 //Front Pages Route
 //Front Pages Route
 Route::get('/', [HomePageController::class, 'index'])->name('home');

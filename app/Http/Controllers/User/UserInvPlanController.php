@@ -361,64 +361,48 @@ class UserInvPlanController extends Controller
     public function cancelPlan($plan)
     {
         try {
-            // Find the investment plan
-            $investment = Investment::find($plan);
-            if (!$investment) {
-                return back()->with('message', 'Investment plan not found');
-            }
-
-            // Check if plan belongs to current user
-            if ($investment->user != Auth::id()) {
-                return back()->with('message', 'Unauthorized action');
-            }
-
-            // Check if plan is already cancelled
-            if ($investment->active == 'cancelled') {
-                return back()->with('message', 'Plan is already cancelled');
-            }
-
-            DB::beginTransaction();
-
-            // Mark plan as cancelled
-            $investment->active = 'cancelled';
-            $investment->save();
-
-            // Credit the user their capital
-            $user = Auth::user();
-            User::where('id', $investment->user)
-                ->update([
-                    'account_bal' => $user->account_bal + $investment->amount,
-                ]);
-
-            // Save to transaction history
-            Tp_Transaction::create([
-                'user' => $investment->user,
-                'plan' => $investment->dplan->name ?? 'Investment Plan',
-                'amount' => $investment->amount,
-                'type' => "Investment capital for cancelled plan",
-            ]);
-
-            DB::commit();
-
-            // Send notification email
-            try {
-                $planName = $investment->dplan->name ?? 'Investment Plan';
-                $message = "You have successfully cancelled your {$planName} plan and your investment capital has been credited to your account. If this is a mistake, please contact us immediately to reactivate it for you.";
-
-                try {
-                    Mail::to($user->email)->send(new NewNotification($message, 'Investment Plan Cancelled', $user->name));
-                } catch (\Exception $e) {
-                    \Log::error('Failed to send plan cancellation email to user. User: ' . $user->name . ' (' . $user->email . '), Plan: ' . $planName . ', Investment ID: ' . $investment->id . '. Error: ' . $e->getMessage());
+            $result = DB::transaction(function () use ($plan) {
+                $investment = Investment::whereKey($plan)->lockForUpdate()->first();
+                if (!$investment) {
+                    return ['message' => 'Investment plan not found'];
                 }
-            } catch (\Exception $e) {
-                \Log::error('Failed to send plan cancellation email: ' . $e->getMessage());
+                if ((int) $investment->user !== (int) Auth::id()) {
+                    return ['message' => 'Unauthorized action'];
+                }
+                // Never refund a completed, expired, or previously cancelled investment.
+                if ($investment->active !== 'yes') {
+                    return ['message' => 'Only active investment plans can be cancelled'];
+                }
+                $user = User::whereKey($investment->user)->lockForUpdate()->firstOrFail();
+                $investment->active = 'cancelled';
+                $investment->save();
+                // Atomic increment under user row lock; no stale account balance overwrite.
+                User::whereKey($user->id)->increment('account_bal', $investment->amount);
+                $planName = optional($investment->dplan)->name ?? 'Investment Plan';
+                Tp_Transaction::create([
+                    'user' => $investment->user,
+                    'plan' => $planName,
+                    'amount' => $investment->amount,
+                    'type' => 'Investment capital for cancelled plan',
+                ]);
+                return ['success' => true, 'user' => $user, 'planName' => $planName];
+            }, 3);
+
+            if (empty($result['success'])) {
+                return back()->with('message', $result['message']);
             }
-
+            $user = $result['user'];
+            $planName = $result['planName'];
+            try {
+                $message = "You have successfully cancelled your {$planName} plan and your investment capital has been credited to your account. If this is a mistake, please contact us immediately to reactivate it for you.";
+                Mail::to($user->email)->send(new NewNotification($message, 'Investment Plan Cancelled', $user->name));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send cancellation email for investment ' . $plan . ': ' . $e->getMessage());
+            }
             return back()->with('success', 'Plan cancelled successfully');
-
         } catch (\Exception $e) {
-            DB::rollback();
-            return back()->with('message', 'Failed to cancel plan: ' . $e->getMessage());
+            \Log::error('Investment cancellation failed for ' . $plan . ': ' . $e->getMessage());
+            return back()->with('message', 'Failed to cancel investment plan');
         }
     }
 }

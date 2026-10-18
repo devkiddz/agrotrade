@@ -125,6 +125,112 @@
 <!-- Tailwind CDN -->
 {{-- <script src="https://cdn.tailwindcss.com"></script> --}}
 
+<style>
+/* AGROTRADE_CUSTOMER_SHELL_R4: dashboard-only compact translation control */
+/* AGROTRADE_LANGUAGE_R5 */
+.agrotrade-dashboard-language{width:94px}
+.agrotrade-dashboard-language select{font-size:12px;letter-spacing:.02em}
+#agrotrade-translation-loader[hidden]{display:none!important}
+#agrotrade-translation-loader{display:flex;align-items:center;justify-content:center;width:24px;height:32px;flex:none}
+.agrotrade-translation-spinner{width:16px;height:16px;border:2px solid #94a3b8;border-top-color:#2563eb;border-radius:50%;animation:agrotrade-language-spin .65s linear infinite}
+@keyframes agrotrade-language-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.agrotrade-translation-spinner{animation-duration:1.8s}}
+.agrotrade-dashboard-language{width:70px;flex:none}
+.agrotrade-dashboard-language select{display:block;width:100%;height:34px;padding:0 4px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;color:#0f172a;font-size:12px;font-weight:600;color-scheme:light}
+.agrotrade-dashboard-language select option{background:#fff;color:#0f172a}
+.dark .agrotrade-dashboard-language select{border-color:#475569;background:#1e293b;color:#f8fafc;color-scheme:dark}
+.dark .agrotrade-dashboard-language select option{background:#1e293b;color:#f8fafc}
+</style>
+<script>
+window.gtranslateSettings = {default_language:'en', wrapper_selector:'.gtranslate_wrapper_dashboard', flag_style:'3d', alt_flags:{en:'usa'}};
+</script>
+<script src="https://cdn.gtranslate.net/widgets/latest/dropdown.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+ const host=document.querySelector('.agrotrade-dashboard-language'); if(!host)return;
+ /* AGROTRADE_LANGUAGE_R5: readable three-letter codes and flags. */
+ const languageLabels={en:['ENG','🇺🇸'],fr:['FRA','🇫🇷'],es:['ESP','🇪🇸'],de:['DEU','🇩🇪'],it:['ITA','🇮🇹'],pt:['POR','🇵🇹'],ru:['RUS','🇷🇺'],ar:['ARA','🇸🇦'],zh:['ZHO','🇨🇳'],ja:['JPN','🇯🇵'],ko:['KOR','🇰🇷'],hi:['HIN','🇮🇳'],tr:['TUR','🇹🇷'],nl:['NLD','🇳🇱'],pl:['POL','🇵🇱'],sw:['SWA','🇰🇪'],yo:['YOR','🇳🇬'],ig:['IBO','🇳🇬'],ha:['HAU','🇳🇬'],id:['IND','🇮🇩'],vi:['VIE','🇻🇳'],th:['THA','🇹🇭'],uk:['UKR','🇺🇦']};
+ function compact(){host.querySelectorAll('select option').forEach(function(option){
+  if(!option.dataset.fullName)option.dataset.fullName=option.textContent.trim();
+  const code=String(option.value||'').trim().split('|').pop().toLowerCase();
+  if(!/^[a-z]{2,3}(-[a-z]{2,4})?$/.test(code))return;
+  const base=code.split('-')[0];
+  const match=languageLabels[base];
+  const label=match ? match[1]+' '+match[0] : code.toUpperCase();
+  if(option.textContent!==label)option.textContent=label;
+ });}
+ compact();new MutationObserver(compact).observe(host,{childList:true,subtree:true});
+ const loader=document.getElementById('agrotrade-translation-loader');
+ let loaderTimer=null;
+ function hideLoader(){if(loader){loader.hidden=true;loader.setAttribute('aria-hidden','true');}if(loaderTimer){clearTimeout(loaderTimer);loaderTimer=null;}}
+ function showLoader(){if(!loader)return;loader.hidden=false;loader.setAttribute('aria-hidden','false');if(loaderTimer)clearTimeout(loaderTimer);loaderTimer=setTimeout(hideLoader,9000);}
+ host.addEventListener('change',function(event){if(event.target && event.target.matches('select'))showLoader();},true);
+ // GTranslate may change the document without a full navigation. Never leave the indicator stuck.
+ window.addEventListener('pageshow',hideLoader);
+ window.addEventListener('load',hideLoader);
+ document.addEventListener('visibilitychange',function(){if(!document.hidden)hideLoader();});
+});
+</script>
+
+<!-- AGROTRADE_LANGUAGE_ALIGNMENT_R7: independently aligned flag, code, and chevron -->
+<style>
+.agrotrade-dashboard-language{width:112px!important;min-width:112px!important}
+.agrotrade-dashboard-language .agrotrade-flag-button{display:grid!important;grid-template-columns:24px minmax(0,1fr) 12px!important;align-items:center!important;column-gap:9px!important;width:100%!important;min-height:38px!important;padding:0 10px!important;text-align:left!important;white-space:nowrap!important}
+.agrotrade-dashboard-language .agrotrade-flag-image{display:block!important;width:24px!important;height:18px!important;object-fit:cover!important}
+.agrotrade-dashboard-language .agrotrade-flag-code{display:block;min-width:0;font-size:12px;font-weight:700;line-height:1;letter-spacing:.035em;text-align:left}
+.agrotrade-dashboard-language .agrotrade-flag-chevron{display:block;width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:translateY(-2px) rotate(45deg);opacity:.8;justify-self:center}
+.agrotrade-dashboard-language .agrotrade-flag-button[aria-expanded="true"] .agrotrade-flag-chevron{transform:translateY(2px) rotate(225deg)}
+.agrotrade-dashboard-language .agrotrade-flag-button:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
+</style>
+<!-- AGROTRADE_LANGUAGE_FLAGS_R6: real flag images; original GTranslate select remains authoritative. -->
+<style>
+.agrotrade-dashboard-language{position:relative;width:92px!important;flex:none}
+.agrotrade-dashboard-language .gtranslate_wrapper_dashboard{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}
+.agrotrade-flag-button{display:flex;align-items:center;justify-content:space-between;gap:5px;width:100%;height:34px;padding:0 7px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;color:#0f172a;font-size:12px;font-weight:700}
+.dark .agrotrade-flag-button{background:#1e293b;border-color:#475569;color:#f8fafc}
+.agrotrade-flag-image{width:21px;height:15px;object-fit:cover;border-radius:2px;box-shadow:0 0 0 1px #0002;flex:none}
+.agrotrade-flag-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:100;width:192px;max-height:min(360px,65vh);overflow:auto;border:1px solid #cbd5e1;border-radius:10px;background:#fff;box-shadow:0 12px 30px #0002;padding:5px}
+.dark .agrotrade-flag-menu{background:#1e293b;border-color:#475569}
+.agrotrade-flag-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 9px;border-radius:7px;text-align:left;color:#0f172a;font-size:12px}
+.dark .agrotrade-flag-item{color:#f8fafc}
+.agrotrade-flag-item:hover,.agrotrade-flag-item:focus-visible{background:#e2e8f0;outline:none}
+.dark .agrotrade-flag-item:hover,.dark .agrotrade-flag-item:focus-visible{background:#334155}
+.agrotrade-flag-item[aria-selected=true]{font-weight:700;background:#eff6ff}
+.dark .agrotrade-flag-item[aria-selected=true]{background:#1e3a5f}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ const host=document.querySelector('.agrotrade-dashboard-language');if(!host)return;
+ const country={en:'gb',fr:'fr',es:'es',de:'de',it:'it',pt:'pt',ru:'ru',ar:'sa',zh:'cn',ja:'jp',ko:'kr',hi:'in',tr:'tr',nl:'nl',pl:'pl',sw:'ke',yo:'ng',ig:'ng',ha:'ng',id:'id',vi:'vn',th:'th',uk:'ua'};
+ const names={en:'English',fr:'French',es:'Spanish',de:'German',it:'Italian',pt:'Portuguese',ru:'Russian',ar:'Arabic',zh:'Chinese',ja:'Japanese',ko:'Korean',hi:'Hindi',tr:'Turkish',nl:'Dutch',pl:'Polish',sw:'Swahili',yo:'Yoruba',ig:'Igbo',ha:'Hausa',id:'Indonesian',vi:'Vietnamese',th:'Thai',uk:'Ukrainian'};
+ const codes={en:'ENG',fr:'FRA',es:'ESP',de:'DEU',it:'ITA',pt:'POR',ru:'RUS',ar:'ARA',zh:'ZHO',ja:'JPN',ko:'KOR',hi:'HIN',tr:'TUR',nl:'NLD',pl:'POL',sw:'SWA',yo:'YOR',ig:'IBO',ha:'HAU',id:'IND',vi:'VIE',th:'THA',uk:'UKR'};
+ const button=document.createElement('button');button.type='button';button.className='agrotrade-flag-button';button.setAttribute('aria-label','Choose language');button.setAttribute('aria-haspopup','listbox');button.setAttribute('aria-expanded','false');
+ const menu=document.createElement('div');menu.className='agrotrade-flag-menu';menu.setAttribute('role','listbox');menu.hidden=true;
+ host.append(button,menu);
+ function key(value){return String(value||'').trim().split('|').pop().toLowerCase().split('-')[0];}
+ function flag(lang){const img=document.createElement('img');img.className='agrotrade-flag-image';img.src='https://flagcdn.com/24x18/'+(country[lang]||'un')+'.png';img.alt='';img.loading='lazy';return img;}
+ function close(){menu.hidden=true;button.setAttribute('aria-expanded','false');}
+ function render(){const select=host.querySelector('select');if(!select){button.textContent='Language';return;}
+  const options=Array.from(select.options).filter(o=>o.value && !o.disabled);const selected=key(select.value||'en');
+  const code=document.createElement('span');code.className='agrotrade-flag-code';code.textContent=codes[selected]||selected.toUpperCase();
+  const chevron=document.createElement('span');chevron.className='agrotrade-flag-chevron';chevron.setAttribute('aria-hidden','true');
+  button.replaceChildren(flag(selected),code,chevron);
+  menu.replaceChildren();options.forEach(function(option){const lang=key(option.value);if(!country[lang])return;
+   const item=document.createElement('button');item.type='button';item.className='agrotrade-flag-item';item.setAttribute('role','option');item.setAttribute('aria-selected',String(option.selected));
+   item.append(flag(lang),document.createTextNode((codes[lang]||lang.toUpperCase())+' · '+(names[lang]||option.dataset.fullName||lang)));
+   item.addEventListener('click',function(){if(select.value!==option.value){select.value=option.value;select.dispatchEvent(new Event('change',{bubbles:true}));}close();render();});menu.appendChild(item);
+  });
+ }
+ button.addEventListener('click',function(){render();menu.hidden=!menu.hidden;button.setAttribute('aria-expanded',String(!menu.hidden));});
+ document.addEventListener('click',function(e){if(!host.contains(e.target))close();});
+ document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+ host.addEventListener('change',function(e){if(e.target.matches('select'))render();});
+ let lastSignature='';let attempts=0;
+ const watcher=setInterval(function(){const s=host.querySelector('select');const signature=s?Array.from(s.options).map(o=>o.value).join(',')+'|'+s.value:'';
+ if(signature!==lastSignature){lastSignature=signature;render();}if(++attempts>=60)clearInterval(watcher);},500);
+ render();
+});
+</script>
 </head>
 <body x-data="{ darkMode: localStorage.theme === 'dark' || !localStorage.theme, sidebarOpen: false }"
       :class="{ 'dark': darkMode }"
@@ -138,306 +244,51 @@
     display: none !important;
   }
         </style>
-<!-- Professional Trading Navbar -->
-<nav x-data="{
-  open: false,
-  darkMode: localStorage.theme === 'dark' || !localStorage.theme,
-  notificationOpen: false,
-  quickActionsOpen: false
-}"
-     class="bg-white/98 dark:bg-gray-900/98 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-700/80 sticky top-0 z-50 shadow-sm dark:shadow-gray-900/20" x-cloak>
-
-  <!-- Main Navigation Container -->
-  <div class="max-w-7xl mx-auto px-6 lg:px-8">
-    <div class="flex justify-between items-center h-20">
-
-      <!-- Left Section: Logo & Quick Market Info -->
-      <div class="flex items-center space-x-4">
-        <!-- Logo -->
-        <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 group">
-          <img src="{{ asset('storage/app/public/'.$settings->logo)}}" class="h-8 w-auto" alt="Logo" />
-          <div class="hidden sm:block">
-            <span class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-              {{ config('app.name', 'BluTrade') }}
-            </span>
-            <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">
-              Professional Trading
-            </div>
-          </div>
-        </a>
-
-        <!-- Live Market Ticker (Hidden on small screens) -->
-        <div class="hidden lg:flex items-center space-x-4 ml-8 pl-8 border-l border-gray-200 dark:border-gray-700"
-             x-data="cryptoPrices()" x-init="fetchPrices()">
-          <div class="flex items-center space-x-2">
-            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span class="text-xs font-medium text-gray-600 dark:text-gray-300">LIVE</span>
-          </div>
-          <div class="text-sm">
-            <span class="text-gray-500 dark:text-gray-400">BTC:</span>
-            <span class="font-mono ml-1"
-                  :class="btcChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
-                  x-text="'$' + (btcPrice ? btcPrice.toLocaleString() : '...')"></span>
-          </div>
-          <div class="text-sm">
-            <span class="text-gray-500 dark:text-gray-400">ETH:</span>
-            <span class="font-mono ml-1"
-                  :class="ethChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
-                  x-text="'$' + (ethPrice ? ethPrice.toLocaleString() : '...')"></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Center Section: Account Balance (Desktop) -->
-      <div class="hidden md:flex items-center space-x-6">
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-4 py-2 rounded-lg border border-blue-100 dark:border-blue-800">
-          <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Account Balance</div>
-          <div class="text-lg font-bold text-gray-900 dark:text-white">
-            {{ Auth::user()->currency }}{{ number_format(auth()->user()->account_bal, 2) }}
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Section: Actions & User -->
-      <div class="flex items-center space-x-2">
-
-        <!-- Quick Actions Dropdown (Desktop) -->
-        <div class="hidden md:block relative" x-data="{ quickActionsOpen: false }">
-          <button @click="quickActionsOpen = !quickActionsOpen"
-                  class="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all duration-200">
-            <i data-lucide="zap" class="w-4 h-4"></i>
-            <span>Quick Trade</span>
-            <i data-lucide="chevron-down" class="w-4 h-4" :class="quickActionsOpen ? 'rotate-180' : ''"></i>
-          </button>
-
-          <div x-show="quickActionsOpen" @click.away="quickActionsOpen = false"
-               x-transition:enter="transition ease-out duration-200"
-               x-transition:enter-start="opacity-0 scale-95"
-               x-transition:enter-end="opacity-100 scale-100"
-               class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20" x-cloak>
-            <div class="p-2">
-              <a href="{{ route('deposits') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md">
-                <i data-lucide="plus-circle" class="w-4 h-4 mr-3 text-green-500"></i>
-                Deposit Funds
-              </a>
-              <a href="{{ route('withdrawalsdeposits') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md">
-                <i data-lucide="minus-circle" class="w-4 h-4 mr-3 text-red-500"></i>
-                Withdraw
-              </a>
-              <a href="{{ route('trade.index') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md">
-                <i data-lucide="trending-up" class="w-4 h-4 mr-3 text-blue-500"></i>
-                Trade Markets
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Notifications -->
-        <div class="relative" x-data="{ notificationOpen: false }">
-          <button @click="notificationOpen = !notificationOpen"
-                  class="relative p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all duration-200">
-            <i data-lucide="bell" class="w-5 h-5"></i>
-            @php
-                $unreadCount = \App\Models\Notification::where('user_id', Auth::id())
-                    ->where('is_read', 0)
-                    ->count();
-            @endphp
-            @if($unreadCount > 0)
-                <span class="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] text-xs font-medium text-white bg-red-500 rounded-full px-1 border-2 border-white dark:border-gray-900">
-                    {{ $unreadCount > 99 ? '99+' : $unreadCount }}
-                </span>
-            @endif
-          </button>
-
-          <div x-show="notificationOpen" @click.away="notificationOpen = false"
-               x-transition:enter="transition ease-out duration-200"
-               x-transition:enter-start="opacity-0 scale-95"
-               x-transition:enter-end="opacity-100 scale-100"
-               class="absolute right-0 sm:right-0 sm:left-auto left-1/2 sm:transform-none transform -translate-x-1/2 mt-2 w-80 max-w-[90vw] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20" x-cloak>
-            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                Notifications
-                @if($unreadCount > 0)
-                  <span class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-500 rounded-full">
-                    {{ $unreadCount }}
-                  </span>
-                @endif
-              </h3>
-              {{-- @if($unreadCount > 0)
-              <a href="{{ route('notifications.mark-all-read') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                Mark all read
-              </a>
-              @endif --}}
-            </div>
-
-            <div class="max-h-[60vh] overflow-y-auto">
-              @php
-                  $notifications = \App\Models\Notification::where('user_id', Auth::id())
-                      ->orderBy('created_at', 'desc')
-                      ->take(5)
-                      ->get();
-              @endphp
-
-              @forelse($notifications as $notification)
-                <a href="{{ route('notifications.show', $notification->id) }}" class="block border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <div class="px-4 py-3 {{ !$notification->is_read ? 'bg-blue-50 dark:bg-blue-900/10' : '' }}">
-                    <div class="flex items-start">
-                      <div class="flex-shrink-0 mt-0.5">
-                        <span class="flex h-8 w-8 rounded-full items-center justify-center {{ $notification->type === 'warning' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-500' : ($notification->type === 'success' ? 'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-500' : ($notification->type === 'danger' ? 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-500' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-500')) }}">
-                          <i data-lucide="{{ $notification->type === 'warning' ? 'alert-triangle' : ($notification->type === 'success' ? 'check-circle' : ($notification->type === 'danger' ? 'alert-octagon' : 'info')) }}" class="w-4 h-4"></i>
-                        </span>
-                      </div>
-                      <div class="ml-3 w-0 flex-1">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white {{ !$notification->is_read ? 'font-semibold' : '' }}">
-                          {{ $notification->title }}
-                        </p>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                          {{ \Illuminate\Support\Str::limit($notification->message, 100) }}
-                        </p>
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                          {{ $notification->created_at->diffForHumans() }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              @empty
-                <div class="py-8 text-center">
-                  <div class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 mb-4">
-                    <i data-lucide="bell-off" class="h-6 w-6"></i>
-                  </div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">No notifications</p>
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">We'll notify you when something arrives</p>
-                </div>
-              @endforelse
-            </div>
-
-            @if(count($notifications) > 0)
-              <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-center">
-                <a href="{{ route('notifications') }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">View all notifications</a>
-              </div>
-            @endif
-          </div>
-        </div>
-
-        <!-- Dark Mode Toggle -->
-        <button
-          x-data="{ darkMode: localStorage.getItem('theme') === 'dark' }"
-          @click="darkMode = !darkMode; localStorage.setItem('theme', darkMode ? 'dark' : 'light'); document.documentElement.classList.toggle('dark', darkMode)"
-          class="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all duration-200"
-          :aria-pressed="darkMode">
-          <i data-lucide="sun" x-show="!darkMode" class="w-5 h-5"></i>
-          <i data-lucide="moon" x-show="darkMode" class="w-5 h-5"></i>
-        </button>
-
-        <!-- Language Translator (Desktop) -->
-       
-
-        <!-- User Profile Dropdown -->
-        <div class="relative" x-data="{ dropdownOpen: false }">
-          <button @click="dropdownOpen = !dropdownOpen"
-                  class="flex items-center space-x-3 px-2 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none">
-            <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium">
-                {{ Str::upper(substr(Auth::user()->name, 0, 1)) }}
-              </div>
-              <div class="hidden sm:block text-left">
-                <div class="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[120px]">
-                  {{ auth()->user()->name }}
-                </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Trading Account
-                </div>
-              </div>
-            </div>
-            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400" :class="dropdownOpen ? 'rotate-180' : ''"></i>
-          </button>
-
-          <div x-show="dropdownOpen" @click.away="dropdownOpen = false"
-               x-transition:enter="transition ease-out duration-200"
-               x-transition:enter-start="opacity-0 scale-95"
-               x-transition:enter-end="opacity-100 scale-100"
-               class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20" x-cloak>
-
-            <!-- User Info Header -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-              <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center text-white text-lg font-medium">
-                  {{ Str::upper(substr(Auth::user()->name, 0, 1)) }}
-                </div>
-                <div>
-                  <div class="text-sm font-medium text-gray-900 dark:text-white">
-                    {{ auth()->user()->name }}
-                  </div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ Auth::user()->currency }}{{ number_format(auth()->user()->account_bal, 2) }}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Menu Items -->
-            <div class="p-2">
-              <a href="{{ route('profile') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md">
-                <i data-lucide="user" class="w-4 h-4 mr-3"></i>
-                Profile Settings
-              </a>
-              <a href="{{ route('accounthistory') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md">
-                <i data-lucide="receipt" class="w-4 h-4 mr-3"></i>
-                Account History
-              </a>
-              <a href="{{ route('support') }}" class="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md">
-                <i data-lucide="help-circle" class="w-4 h-4 mr-3"></i>
-                Support Center
-              </a>
-              <div class="border-t border-gray-200 dark:border-gray-600 my-2"></div>
-              <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="w-full flex items-center px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md">
-                  <i data-lucide="log-out" class="w-4 h-4 mr-3"></i>
-                  Sign Out
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mobile Menu Button -->
-        <button @click="sidebarOpen = !sidebarOpen"
-                class="md:hidden p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all duration-200">
-          <i data-lucide="menu" x-show="!sidebarOpen" class="w-5 h-5"></i>
-          <i data-lucide="x" x-show="sidebarOpen" class="w-5 h-5"></i>
-        </button>
-      </div>
+<!-- AGROTRADE_CUSTOMER_SHELL_R4 -->
+<nav class="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm" aria-label="Customer toolbar">
+  <div class="flex items-center justify-between h-16 px-3 sm:px-5 gap-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <button type="button" @click="sidebarOpen = !sidebarOpen" class="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle sidebar" :aria-expanded="sidebarOpen.toString()" aria-controls="agrotrade-customer-sidebar"><i data-lucide="menu" class="w-5 h-5"></i></button>
+      <a href="{{ route('dashboard') }}" class="flex items-center gap-2 min-w-0 text-gray-900 dark:text-white font-semibold" aria-label="Dashboard home">
+        <img src="{{ asset('storage/app/public/'.$settings->logo) }}" class="h-8 w-auto max-w-24 object-contain" alt="" />
+        <span class="hidden sm:inline truncate">{{ config('app.name', 'Agrotrade') }}</span>
+      </a>
     </div>
-  </div>
-
-  <!-- Mobile Market Ticker -->
-  <div class="lg:hidden bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 px-4 py-2"
-       x-data="cryptoPrices()" x-init="fetchPrices()">
-    <div class="flex items-center justify-between text-xs">
-      <div class="flex items-center space-x-4">
-        <div class="flex items-center space-x-1">
-          <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-          <span class="text-gray-600 dark:text-gray-400">LIVE</span>
-        </div>
-        <div>
-          <span class="text-gray-500 dark:text-gray-400">BTC:</span>
-          <span class="font-mono ml-1"
-                :class="btcChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
-                x-text="'$' + (btcPrice ? btcPrice.toLocaleString() : '...')"></span>
-        </div>
-        <div>
-          <span class="text-gray-500 dark:text-gray-400">ETH:</span>
-          <span class="font-mono ml-1"
-                :class="ethChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
-                x-text="'$' + (ethPrice ? ethPrice.toLocaleString() : '...')"></span>
+    <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+      <div class="agrotrade-dashboard-language" aria-label="Translation language"><div class="gtranslate_wrapper_dashboard"></div></div>
+      <div id="agrotrade-translation-loader" hidden aria-hidden="true" role="status" aria-label="Translating page"><span class="agrotrade-translation-spinner"></span><span class="sr-only">Translating</span></div>
+      <button type="button" @click="darkMode = !darkMode; localStorage.setItem('theme', darkMode ? 'dark' : 'light'); document.documentElement.classList.toggle('dark', darkMode)" class="p-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Toggle color theme"><i data-lucide="sun-moon" class="w-5 h-5"></i></button>
+      @php
+        $toolbarUnreadCount = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', 0)->count();
+        $toolbarNotifications = \App\Models\Notification::where('user_id', Auth::id())->latest('created_at')->take(5)->get();
+      @endphp
+      <div class="relative" x-data="{ shown: false }" @keydown.escape.window="shown = false">
+        <button type="button" @click="shown = !shown" :aria-expanded="shown.toString()" aria-label="Notifications" class="relative p-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"><i data-lucide="bell" class="w-5 h-5"></i>
+          @if($toolbarUnreadCount > 0)<span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 text-xs flex items-center justify-center rounded-full bg-red-600 text-white">{{ $toolbarUnreadCount > 99 ? '99+' : $toolbarUnreadCount }}</span>@endif
+        </button>
+        <div x-show="shown" @click.outside="shown = false" x-cloak class="absolute right-0 mt-2 w-[min(22rem,calc(100vw-1rem))] max-h-[70vh] overflow-y-auto rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 shadow-xl z-50">
+          <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-700"><h2 class="font-semibold text-sm">Notifications</h2>
+            @if($toolbarUnreadCount > 0)<form method="POST" action="{{ route('notifications.mark-all-read') }}">@csrf<button type="submit" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Mark all read</button></form>@endif
+          </div>
+          @forelse($toolbarNotifications as $notice)
+            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 {{ !$notice->is_read ? 'bg-blue-50 dark:bg-gray-700/50' : '' }}">
+              <div class="flex gap-2 items-start justify-between"><div class="min-w-0"><p class="text-sm font-semibold break-words">{{ $notice->title }}</p><p class="text-xs text-gray-600 dark:text-gray-300 mt-1 break-words">{{ \Illuminate\Support\Str::limit($notice->message, 110) }}</p><p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $notice->created_at->diffForHumans() }}</p></div>
+                @if(!$notice->is_read)<form method="POST" action="{{ route('notifications.mark-read') }}">@csrf<input type="hidden" name="notification_id" value="{{ $notice->id }}"><button type="submit" class="text-xs whitespace-nowrap text-blue-600 dark:text-blue-400 hover:underline" aria-label="Mark notification as read">Read</button></form>@endif
+              </div>
+            </div>
+          @empty
+            <p class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">No notifications</p>
+          @endforelse
+          <a href="{{ route('notifications') }}" class="block px-4 py-3 text-center text-sm text-blue-600 dark:text-blue-400 hover:underline">View all notifications</a>
         </div>
       </div>
-      <div class="md:hidden">
-        <div class="text-gray-500 dark:text-gray-400">Balance:</div>
-        <div class="font-semibold text-gray-900 dark:text-white">
-          {{ Auth::user()->currency }}{{ number_format(auth()->user()->account_bal, 2) }}
+      <div class="relative" x-data="{ shown: false }" @keydown.escape.window="shown = false">
+        <button type="button" @click="shown = !shown" :aria-expanded="shown.toString()" aria-label="Account menu" class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white"><span class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span><i data-lucide="chevron-down" class="w-4 h-4 hidden sm:block"></i></button>
+        <div x-show="shown" @click.outside="shown = false" x-cloak class="absolute right-0 mt-2 w-48 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl z-50 p-2">
+          <p class="px-3 py-2 text-xs truncate text-gray-500 dark:text-gray-400">{{ Auth::user()->name }}</p>
+          <a href="{{ route('profile') }}" class="block px-3 py-2 text-sm rounded-lg text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">Profile</a>
+          <a href="{{ route('support') }}" class="block px-3 py-2 text-sm rounded-lg text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">Support</a>
+          <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Sign out</button></form>
         </div>
       </div>
     </div>
@@ -445,55 +296,14 @@
 </nav>
 
 
-
 <!-- Sidebar Toggle Wrapper -->
-<div class="flex min-h-screen bg-gray-900" x-cloak>
+<div class="flex min-h-screen bg-gray-50 dark:bg-gray-900" x-cloak>
 
   <!-- Sidebar -->
-<aside x-cloak
+<aside id="agrotrade-customer-sidebar" x-cloak
   :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-  class="fixed z-50 md:z-40 top-0 left-0 w-72 h-full bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 overflow-y-auto">
-
-    <!-- User Profile Section -->
-    <div class="relative p-4 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center gap-4">
-            <div class="relative">
-
-<div class="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-lg font-medium mx-auto mb-3">
-    {{ Str::upper(substr(Auth::user()->name, 0, 1)) }}
-</div>
-                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-900"></div>
-            </div>
-            <div class="flex-1 min-w-0">
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                    {{ auth()->user()->name }}
-                </h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Account Balance: {{ Auth::user()->currency }}{{ number_format(auth()->user()->account_bal, 2) }}
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Live Market Prices -->
-    <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20" x-cloak>
-        <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Live Market</h3>
-            <span class="flex items-center text-xs text-green-600 dark:text-green-400">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
-                <span class="font-medium">LIVE</span>
-            </span>
-        </div>
-        <div class="space-y-2">
-            <coingecko-coin-price-marquee-widget
-                coin-ids="bitcoin,ethereum,eos,ripple,litecoin"
-                currency="usd"
-                background-color="transparent"
-                locale="en"
-                font-color="#333">
-            </coingecko-coin-price-marquee-widget>
-        </div>
-    </div>
+  class="fixed z-50 md:z-40 top-16 left-0 w-72 h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 overflow-y-auto">
+    
 
     <!-- Navigation Menu -->
     <nav class="p-4 space-y-6 text-sm pb-20" x-cloak>
@@ -840,7 +650,7 @@
   </div>
 
   <!-- Main content placeholder -->
-  <div class="flex-1 ml-0 md:ml-64 p-4 pb-20 md:pb-4">
+  <div class="flex-1 min-w-0 ml-0 md:ml-72 p-4 pb-20 md:pb-4">
     <!-- Your main dashboard content goes here -->
     @yield('content')
   </div>
@@ -849,327 +659,6 @@
 
 
 
-
-<!-- Modern Mobile Navigation with Glassmorphism -->
-<link href="https://unpkg.com/lucide@latest" rel="stylesheet">
-
-<div class="fixed bottom-0 w-full z-30 md:hidden" x-data="{ fabOpen: false }" x-cloak>
-  <!-- Bottom Navigation Bar with Glassmorphism -->
-  <div class="flex justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg px-6 py-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] relative border-t border-gray-200/20 dark:border-gray-700/20">
-    <!-- Language Selector (Mobile) -->
-    <div class="group flex flex-col items-center relative">
-      <div class="relative">
-        <div class="gtranslate_wrapper_mobile_nav"></div>
-        <style>
-          .gtranslate_wrapper_mobile_nav {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-          }
-
-          .gtranslate_wrapper_mobile_nav .gt_float_wrapper {
-            position: static !important;
-            transform: none !important;
-            background: transparent !important;
-            box-shadow: none !important;
-            border: none !important;
-            border-radius: 0 !important;
-            width: auto !important;
-            height: auto !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-          }
-
-          .gtranslate_wrapper_mobile_nav .gt_float_wrapper a {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            text-decoration: none !important;
-            transition: all 0.2s ease !important;
-          }
-
-          .gtranslate_wrapper_mobile_nav .gt_float_wrapper a:hover {
-            transform: scale(1.05) !important;
-          }
-
-          .gtranslate_wrapper_mobile_nav .gt_float_wrapper img {
-            width: 24px !important;
-            height: 24px !important;
-            border-radius: 4px !important;
-            margin: 0 !important;
-          }
-
-          .gtranslate_wrapper_mobile_nav .gt_float_wrapper .gt_options {
-            position: fixed !important;
-            bottom: 80px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            background: white !important;
-            border: 1px solid #e5e7eb !important;
-            border-radius: 12px !important;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-            z-index: 1000 !important;
-            max-height: 300px !important;
-            overflow-y: auto !important;
-            width: 280px !important;
-            max-width: 90vw !important;
-          }
-
-          .dark .gtranslate_wrapper_mobile_nav .gt_float_wrapper .gt_options {
-            background: #374151 !important;
-            border-color: #4b5563 !important;
-          }
-
-          .gtranslate_wrapper_mobile_nav .gt_float_wrapper .gt_options a {
-            padding: 8px 12px !important;
-            display: flex !important;
-            align-items: center !important;
-            flex-direction: row !important;
-            gap: 8px !important;
-            color: #374151 !important;
-            font-size: 14px !important;
-            border-bottom: 1px solid #f3f4f6 !important;
-          }
-
-          .dark .gtranslate_wrapper_mobile_nav .gt_float_wrapper .gt_options a {
-            color: #f9fafb !important;
-            border-bottom-color: #4b5563 !important;
-          }
-
-          .gtranslate_wrapper_mobile_nav .gt_float_wrapper .gt_options a:hover {
-            background: #f3f4f6 !important;
-            transform: none !important;
-          }
-
-          .dark .gtranslate_wrapper_mobile_nav .gt_float_wrapper .gt_options a:hover {
-            background: #4b5563 !important;
-          }
-
-          .gtranslate_wrapper_mobile_nav .gt_float_wrapper .gt_options a:last-child {
-            border-bottom: none !important;
-          }
-
-          .gtranslate_wrapper_mobile_nav .gt_float_wrapper .gt_options img {
-            width: 20px !important;
-            height: 20px !important;
-          }
-        </style>
-        <script>
-          if (!window.gtranslateSettingsMobileNav) {
-            window.gtranslateSettingsMobileNav = {
-              "default_language": "en",
-              "wrapper_selector": ".gtranslate_wrapper_mobile_nav",
-              "flag_style": "3d",
-              "alt_flags": {"en": "usa"},
-              "switcher_horizontal_position": "center",
-              "switcher_vertical_position": "bottom"
-            };
-
-            // Load script for mobile nav if not already loaded
-            var script = document.createElement('script');
-            script.src = 'https://cdn.gtranslate.net/widgets/latest/float.js';
-            script.defer = true;
-            document.head.appendChild(script);
-          }
-        </script>
-
-        <i data-lucide="globe" class="w-6 h-6 text-gray-500 group-hover:text-blue-600 transition-colors duration-200"></i>
-      </div>
-      <span class="text-xs mt-1 text-gray-500 group-hover:text-blue-600">Language</span>
-    </div>
-
-    <a href="{{ route('deposits') }}"
-       class="group flex flex-col items-center relative">
-      <div class="p-2 rounded-xl transition-all duration-300 ease-out
-                  {{ request()->routeIs('deposits')
-                     ? 'bg-blue-500/10 dark:bg-blue-400/10 scale-110'
-                     : 'hover:bg-gray-100 dark:hover:bg-gray-800' }}">
-        <i data-lucide="banknote" class="w-6 h-6
-           {{ request()->routeIs('deposits')
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400' }}
-           transition-colors duration-300"></i>
-      </div>
-      <span class="text-xs font-medium mt-1
-            {{ request()->routeIs('deposits')
-               ? 'text-blue-600 dark:text-blue-400'
-               : 'text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400' }}
-            transition-colors duration-300">Deposit</span>
-    </a>
-
-    <a href="{{ route('profile') }}"
-       class="group flex flex-col items-center relative">
-      <div class="p-2 rounded-xl transition-all duration-300 ease-out
-                  {{ request()->routeIs('profile')
-                     ? 'bg-blue-500/10 dark:bg-blue-400/10 scale-110'
-                     : 'hover:bg-gray-100 dark:hover:bg-gray-800' }}">
-        <i data-lucide="user" class="w-6 h-6
-           {{ request()->routeIs('profile')
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400' }}
-           transition-colors duration-300"></i>
-      </div>
-      <span class="text-xs font-medium mt-1
-            {{ request()->routeIs('profile')
-               ? 'text-blue-600 dark:text-blue-400'
-               : 'text-gray-500 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400' }}
-            transition-colors duration-300">Profile</span>
-    </a>
-
-    <!-- Animated FAB Button -->
-    <button @click="fabOpen = !fabOpen"
-            class="absolute -top-7 left-1/2 transform -translate-x-1/2
-                   bg-gradient-to-r from-blue-600 to-indigo-600 text-white
-                   w-14 h-14 rounded-full flex items-center justify-center
-                   shadow-[0_8px_30px_rgba(59,130,246,0.5)]
-                   border-4 border-white dark:border-gray-900
-                   hover:scale-110 hover:shadow-[0_8px_35px_rgba(59,130,246,0.6)]
-                   active:scale-95
-                   transition-all duration-300 ease-out">
-      <i data-lucide="zap" class="w-6 h-6 transform transition-transform group-hover:scale-110"></i>
-      <!-- Pulse Effect -->
-      <span class="absolute w-full h-full rounded-full bg-blue-500 animate-ping opacity-20"></span>
-    </button>
-
-<a href="{{ route('support') }}"
-   class="flex flex-col items-center
-          {{ request()->routeIs('support') ? 'text-blue-600 font-semibold' : 'text-gray-500' }}
-          hover:text-blue-600">
-  <i data-lucide="life-buoy" class="w-6 h-6"></i>
-  <span class="text-xs mt-1">Support</span>
-</a>
-
-
-
-   <a href="{{ route('dashboard') }}"
-   class="flex flex-col items-center
-          {{ request()->routeIs('dashboard') ? 'text-blue-600' : 'text-gray-500' }} hover:text-blue-600">
- <i data-lucide="home" class="w-6 h-6 transition-colors duration-200"></i>
-  <span class="text-xs mt-1">Home</span>
-</a>
-  </div>
-
-  <!-- Modern FAB Overlay Menu -->
-  <div x-show="fabOpen"
-       @click.away="fabOpen = false"
-       class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm z-40 flex items-center justify-center p-4"
-       x-transition:enter="transition ease-out duration-300"
-       x-transition:enter-start="opacity-0"
-       x-transition:enter-end="opacity-100"
-       x-transition:leave="transition ease-in duration-200"
-       x-transition:leave-start="opacity-100"
-       x-transition:leave-end="opacity-0" x-cloak>
-
-    <!-- Menu Card -->
-    <div class="bg-gray-900 p-6 rounded-2xl
-                shadow-[0_8px_30px_rgba(0,0,0,0.3)]
-                space-y-4 w-72 max-w-full
-                border border-gray-700
-                transform transition-all duration-300
-                animate-slideUp">
-
-      <!-- Quick Actions Grid -->
-      <div class="grid grid-cols-2 gap-4 mb-6">
-        <a href="{{ route('mplans') }}"
-           class="flex flex-col items-center p-4 rounded-xl
-                  bg-gray-800 border border-gray-700
-                  hover:bg-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-300
-                  group">
-          <i data-lucide="trending-up" class="w-6 h-6 mb-2 text-blue-400
-                                              group-hover:scale-110 transition-transform duration-300"></i>
-          <span class="text-sm font-medium text-gray-200">Invest</span>
-        </a>
-
-        <a href="{{ route('withdrawalsdeposits') }}"
-           class="flex flex-col items-center p-4 rounded-xl
-                  bg-gray-800 border border-gray-700
-                  hover:bg-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-300
-                  group">
-          <i data-lucide="wallet" class="w-6 h-6 mb-2 text-green-400
-                                       group-hover:scale-110 transition-transform duration-300"></i>
-          <span class="text-sm font-medium text-gray-200">Withdraw</span>
-        </a>
-      </div>
-
-      <!-- Menu Links -->
-      <div class="space-y-2">
-        <a href="{{ route('copy.dashboard') }}" class="flex items-center p-3 rounded-lg text-gray-100
-                          hover:bg-gray-800
-                          transition-colors duration-200 group">
-          <i data-lucide="copy" class="w-5 h-5 mr-3 text-blue-400
-                                     group-hover:scale-110 transition-transform duration-300"></i>
-          <span class="font-medium">Copy Trading</span>
-          <!--<span class="ml-auto text-xs font-bold text-green-400">New</span>-->
-        </a>
-
-        <a href="{{ route('transferview') }}" class="flex items-center p-3 rounded-lg text-gray-100
-                          hover:bg-gray-800
-                          transition-colors duration-200 group">
-          <i data-lucide="refresh-ccw" class="w-5 h-5 mr-3 text-purple-400
-                                             group-hover:rotate-180 transition-transform duration-500"></i>
-          <span class="font-medium">Transfer Funds</span>
-        </a>
-
-        {{-- <a href="{{ route('assetbalance') }}" class="flex items-center p-3 rounded-lg text-gray-100
-                          hover:bg-gray-800
-                          transition-colors duration-200 group">
-          <i data-lucide="repeat" class="w-5 h-5 mr-3 text-indigo-400
-                                        group-hover:scale-110 transition-transform duration-300"></i>
-          <span class="font-medium">Currency Exchange</span>
-          <span class="ml-auto text-xs font-bold text-indigo-400">Swap</span>
-        </a> --}}
-
-        <a href="#" class="flex items-center p-3 rounded-lg text-gray-100
-                          hover:bg-gray-800
-                          transition-colors duration-200 group">
-          <i data-lucide="users" class="w-5 h-5 mr-3 text-orange-400
-                                      group-hover:scale-110 transition-transform duration-300"></i>
-          <span class="font-medium">Refer Friends</span>
-          <span class="ml-auto text-xs font-bold text-orange-400">+{{$settings->referral_commission}}%</span>
-        </a>
-
-        <a href="{{ route('support') }}" class="flex items-center p-3 rounded-lg text-gray-100
-                                               hover:bg-gray-800
-                                               transition-colors duration-200 group">
-          <i data-lucide="life-buoy" class="w-5 h-5 mr-3 text-cyan-400
-                                           group-hover:scale-110 transition-transform duration-300"></i>
-          <span class="font-medium">Support</span>
-        </a>
-
-        <a href="{{ route('user.bots.index') }}" class="flex items-center p-3 rounded-lg text-gray-100
-                          hover:bg-gray-800
-                          transition-colors duration-200 group">
-          <i data-lucide="newspaper" class="w-5 h-5 mr-3 text-indigo-400
-                                          group-hover:scale-110 transition-transform duration-300"></i>
-          <span class="font-medium">Bots Trading</span>
-        </a>
-      </div>
-
-      <!-- Close Button -->
-      <button @click="fabOpen = false"
-              class="absolute top-2 right-2 p-2 rounded-full
-                     text-gray-400 hover:text-gray-200
-                     hover:bg-gray-800
-                     transition-colors duration-200">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-    </div>
-  </div>
-
-  <style>
-    @keyframes slideUp {
-      from { opacity: 0; transform: scale(0.95) translateY(10px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .animate-slideUp {
-      animation: slideUp 0.3s ease-out forwards;
-    }
-  </style>
-</div>
 
 <!-- Script for Lucide Icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -1200,58 +689,10 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
-<!-- Live Crypto Prices Script -->
-<script>
-// Alpine.js component for live crypto prices
-function cryptoPrices() {
-  return {
-    btcPrice: null,
-    ethPrice: null,
-    btcChange: 0,
-    ethChange: 0,
-    lastUpdate: null,
 
-    async fetchPrices() {
-      try {
-        // Using CoinGecko API (free, no API key required)
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
-        const data = await response.json();
-
-        if (data.bitcoin && data.ethereum) {
-          this.btcPrice = Math.round(data.bitcoin.usd);
-          this.ethPrice = Math.round(data.ethereum.usd);
-          this.btcChange = data.bitcoin.usd_24h_change || 0;
-          this.ethChange = data.ethereum.usd_24h_change || 0;
-          this.lastUpdate = new Date();
-
-          console.log('Crypto prices updated:', {
-            BTC: this.btcPrice,
-            ETH: this.ethPrice,
-            time: this.lastUpdate
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching crypto prices:', error);
-        // Fallback to static values on error
-        this.btcPrice = this.btcPrice || 45320;
-        this.ethPrice = this.ethPrice || 2850;
-      }
-
-      // Update prices every 30 seconds
-      setTimeout(() => this.fetchPrices(), 30000);
-    }
-  }
-}
-
-// Initialize when Alpine is ready
-document.addEventListener('alpine:init', () => {
-  // Register the component globally
-  Alpine.data('cryptoPrices', cryptoPrices);
-});
-</script>
 
 @yield('scripts')
-@include('layouts.lang')
+
 @include('layouts.livechat')
 </body>
 </html>

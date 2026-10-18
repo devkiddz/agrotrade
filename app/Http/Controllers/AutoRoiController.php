@@ -21,6 +21,13 @@ class AutoRoiController extends Controller
      */
     public function processAutomaticRoi()
     {
+        // Phase 1B-F0: fail closed if another financial run holds the cache lock.
+        $agrotradeRunLock = \Illuminate\Support\Facades\Cache::lock('agrotrade:financial:new-roi', 7200);
+        if (!$agrotradeRunLock->get()) {
+            \Illuminate\Support\Facades\Log::warning('Agrotrade financial cron overlapping run blocked: processAutomaticRoi');
+            return response()->json(['success' => false, 'message' => 'Financial processing already running'], 409);
+        }
+        try {
         try {
             $settings = Settings::find(1);
 
@@ -35,55 +42,53 @@ class AutoRoiController extends Controller
             $processed = 0;
             $completed = 0;
 
-            foreach ($activePlans as $userPlan) {
+            foreach ($activePlans as $candidate) {
                 try {
-                    // Get associated plan and user
-                    $plan = $userPlan->plan;
-                    $user = $userPlan->user;
-
-                    if (!$plan || !$user) {
-                        continue;
-                    }
-
-                    // Calculate next payout date based on payout interval
-                    $lastPayout = $userPlan->last_payout_at ?? $userPlan->activated_at;
-
-                    if (!$lastPayout) {
-                        continue;
-                    }
-
-                    $nextPayoutDate = $this->calculateNextPayoutDate($lastPayout, $plan->payout_interval);
-
-                    // Skip if it's not time for payout yet
-                    if ($now->lt($nextPayoutDate)) {
-                        continue;
-                    }
-
-                    // Skip weekend payouts if weekend trading is disabled
-                    if ($now->isWeekend() && $settings->weekend_trade != 'on') {
-                        // Just update the last payout time to prevent buildup
-                        $userPlan->update(['last_payout_at' => $now]);
-                        continue;
-                    }
-
-                    // Check if plan has matured
-                    if ($userPlan->hasMatured()) {
-                        $this->completePlan($userPlan, $settings);
+                    // The plan row is the per-investment serialization boundary.
+                    $outcome = \Illuminate\Support\Facades\DB::transaction(function () use ($candidate, $settings) {
+                        $userPlan = UserPlan::whereKey($candidate->id)->lockForUpdate()->first();
+                        if (!$userPlan || $userPlan->status !== 'active') {
+                            return 'skipped';
+                        }
+                        // Phase 1C: locked investment prevents admin/payout race.
+                        if (!\Illuminate\Support\Facades\Schema::hasTable('agrotrade_investment_controls')) return 'skipped';
+                    if (\Illuminate\Support\Facades\DB::table('agrotrade_investment_controls')->where('investment_type', 'modern')->where('investment_id', $userPlan->id)->where('state', '!=', 'active')->exists()) return 'skipped';
+                        $plan = $userPlan->plan;
+                        if (!$plan) {
+                            return 'skipped';
+                        }
+                        $user = User::whereKey($userPlan->user_id)->lockForUpdate()->first();
+                        if (!$user) {
+                            return 'skipped';
+                        }
+                        // Use the locked user for all balance changes, not the preloaded snapshot.
+                        $userPlan->setRelation('user', $user);
+                        $userPlan->setRelation('plan', $plan);
+                        $now = Carbon::now();
+                        $lastPayout = $userPlan->last_payout_at ?? $userPlan->activated_at;
+                        if (!$lastPayout || $now->lt($this->calculateNextPayoutDate($lastPayout, $plan->payout_interval))) {
+                            return 'skipped';
+                        }
+                        if ($now->isWeekend() && $settings->weekend_trade != 'on') {
+                            $userPlan->update(['last_payout_at' => $now]);
+                            return 'skipped';
+                        }
+                        if ($userPlan->hasMatured()) {
+                            $this->completePlan($userPlan, $settings);
+                            return 'completed';
+                        }
+                        $roiPercentage = $this->calculateRoiPercentage($plan);
+                        $roiAmount = $this->calculateRoiAmount($userPlan, $roiPercentage);
+                        $this->processRoiPayment($userPlan, $roiAmount, $roiPercentage);
+                        return 'processed';
+                    }, 3);
+                    if ($outcome === 'processed') {
+                        $processed++;
+                    } elseif ($outcome === 'completed') {
                         $completed++;
-                        continue;
                     }
-
-                    // Calculate ROI amount
-                    $roiPercentage = $this->calculateRoiPercentage($plan);
-                    $roiAmount = $this->calculateRoiAmount($userPlan, $roiPercentage);
-
-                    // Process the ROI payment
-                    $this->processRoiPayment($userPlan, $roiAmount, $roiPercentage);
-
-                    $processed++;
-
-                } catch (\Exception $e) {
-                    Log::error("Error processing ROI for user plan #{$userPlan->id}: " . $e->getMessage());
+                } catch (\Throwable $e) {
+                    Log::error('ROI transaction failed for user plan #' . $candidate->id . ': ' . $e->getMessage());
                     continue;
                 }
             }
@@ -96,6 +101,9 @@ class AutoRoiController extends Controller
         } catch (\Exception $e) {
             Log::error("Error in automatic ROI process: " . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+        } finally {
+            $agrotradeRunLock->release();
         }
     }
 
@@ -178,10 +186,8 @@ class AutoRoiController extends Controller
             ]);
         } else {
             // Non-compounding, add to user's balance
-            $user->update([
-                'roi' => $user->roi + $roiAmount,
-                'account_bal' => $user->account_bal + $roiAmount
-            ]);
+            User::whereKey($user->id)->increment('roi', $roiAmount);
+            User::whereKey($user->id)->increment('account_bal', $roiAmount);
 
             $userPlan->update([
                 'total_profit' => $userPlan->total_profit + $roiAmount,
@@ -201,7 +207,13 @@ class AutoRoiController extends Controller
         // Send email notification if enabled
         if ($user->sendroiemail == 'Yes') {
             try {
-                Mail::to($user->email)->send(new NewRoi($user, $plan->name, $roiAmount, $now, 'New Return on Investment (ROI)'));
+                \Illuminate\Support\Facades\DB::afterCommit(function () use ($user, $plan, $roiAmount, $now) {
+                    try {
+                        Mail::to($user->email)->send(new NewRoi($user, $plan->name, $roiAmount, $now, 'New Return on Investment (ROI)'));
+                    } catch (\Throwable $e) {
+                        Log::error('Post-commit ROI email failed: ' . $e->getMessage());
+                    }
+                });
             } catch (\Exception $e) {
                 Log::error("Failed to send ROI email to {$user->email}: " . $e->getMessage());
             }
@@ -220,9 +232,7 @@ class AutoRoiController extends Controller
         // Return capital if that's the platform setting
         if ($settings->return_capital) {
             // Add capital to user balance
-            $user->update([
-                'account_bal' => $user->account_bal + $userPlan->invested_amount
-            ]);
+            User::whereKey($user->id)->increment('account_bal', $userPlan->invested_amount);
 
             // Create transaction for returned capital
             Tp_Transaction::create([
@@ -254,7 +264,13 @@ class AutoRoiController extends Controller
         // Send completion email notification
         if ($user->sendinvplanemail == "Yes") {
             try {
-                Mail::to($user->email)->send(new PlanCompleted($user, $plan, $userPlan));
+                \Illuminate\Support\Facades\DB::afterCommit(function () use ($user, $plan, $userPlan) {
+                    try {
+                        Mail::to($user->email)->send(new PlanCompleted($user, $plan, $userPlan));
+                    } catch (\Throwable $e) {
+                        Log::error('Post-commit plan completion email failed: ' . $e->getMessage());
+                    }
+                });
             } catch (\Exception $e) {
                 Log::error("Failed to send plan completion email to {$user->email}: " . $e->getMessage());
             }

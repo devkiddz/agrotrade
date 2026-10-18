@@ -123,6 +123,14 @@
                 lucide.createIcons();
             }
 
+            // Persist one idempotency reference across retries of the same transfer details.
+            let transferRequestId = null;
+            let transferFingerprint = null;
+            const transferUuid = () => {
+                if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
+                throw new Error('Secure browser UUID support is required for transfers.');
+            };
+
             // Form submission handler with improved UX
             document.getElementById('transferform').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -162,6 +170,16 @@
                         const amount = document.getElementById('amount').value;
                         const recipient = document.getElementById('email').value;
 
+                        const fingerprint = JSON.stringify([recipient.trim(), amount]);
+                        if (!transferRequestId || fingerprint !== transferFingerprint) {
+                            try { transferRequestId = transferUuid(); }
+                            catch (error) {
+                                Swal.fire({icon: 'error', text: 'Please use a modern secure browser to transfer funds.'});
+                                return;
+                            }
+                            transferFingerprint = fingerprint;
+                        }
+
                         // Update button state
                         const submitBtn = document.getElementById('subbtn');
                         const originalContent = submitBtn.innerHTML;
@@ -185,6 +203,7 @@
                                 email: recipient,
                                 amount: amount,
                                 password: password,
+                                transfer_request_id: transferRequestId,
                                 _token: document.querySelector('input[name="_token"]').value
                             })
                         })

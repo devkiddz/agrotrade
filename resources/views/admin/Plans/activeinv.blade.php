@@ -49,6 +49,9 @@
                                                     Action
                                                 </button>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    {{-- Phase 1C row controls: audited mutations are handled on the dedicated controls page. --}}
+                                                    <a class="dropdown-item font-weight-bold" href="{{ route('admin.investment-controls.index', ['type' => 'modern', 'id' => $plan->id]) }}">Manage Investment</a>
+                                                    <div class="dropdown-divider"></div>
                                                     <a class="dropdown-item text-danger"
                                                         href="{{ route('deleteplan', $plan->id) }}">Delete</a>
                                                     <a class="dropdown-item"

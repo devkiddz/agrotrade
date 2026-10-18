@@ -3,6 +3,12 @@
 use App\Http\Controllers\Admin\PlanController;
 use Illuminate\Support\Facades\Route;
 
+// Phase 1C administrative investment governance.
+Route::middleware(['isadmin', '2fa'])->prefix('admin/investment-controls')->name('admin.investment-controls.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\InvestmentControlController::class, 'index'])->name('index');
+    Route::post('/{type}/{id}', [\App\Http\Controllers\Admin\InvestmentControlController::class, 'update'])->where(['type' => 'legacy|modern', 'id' => '[0-9]+'])->name('update');
+});
+
 // Admin Plan Management Routes
 Route::middleware(['isadmin', '2fa'])->prefix('admin')->group(function () {
     // Plan management

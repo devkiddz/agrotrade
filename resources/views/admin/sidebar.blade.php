@@ -85,7 +85,7 @@
                         </div>
                     </li>
                 <li
-                    class="nav-item {{ request()->routeIs('plans') ? 'active' : '' }} {{ request()->routeIs('newplan') ? 'active' : '' }} {{ request()->routeIs('editplan') ? 'active' : '' }} {{ request()->routeIs('investments') ? 'active' : '' }} {{ request()->routeIs('admin.plans.*') ? 'active' : '' }}">
+                    class="nav-item {{ request()->routeIs('plans') ? 'active' : '' }} {{ request()->routeIs('newplan') ? 'active' : '' }} {{ request()->routeIs('editplan') ? 'active' : '' }} {{ request()->routeIs('investments') ? 'active' : '' }} {{ request()->routeIs('admin.plans.*') ? 'active' : '' }} {{ request()->routeIs('admin.investment-controls.*') ? 'active' : '' }}">
                     <a data-toggle="collapse" href="#pln">
                         <i class="fas fa-cubes "></i>
                         <p>Investment</p>
@@ -111,6 +111,12 @@
                             <li>
                                 <a href="{{ url('/admin/dashboard/active-investments') }}">
                                     <span class="sub-item">Active Investments</span>
+                                </a>
+                            </li>
+                            {{-- Phase 1C investment controls navigation --}}
+                            <li>
+                                <a href="{{ route('admin.investment-controls.index') }}">
+                                    <span class="sub-item">Investment Controls</span>
                                 </a>
                             </li>
                         </ul>

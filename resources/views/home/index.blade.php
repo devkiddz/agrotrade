@@ -7,7 +7,7 @@
 @section('content')
 
 <!-- Hero Section -->
-<section class="relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800">
+<section class="relative overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 agrotrade-hero">
     <!-- Abstract Background Elements -->
     <div class="absolute inset-0 z-0">
         <div class="absolute top-0 left-0 w-full h-full opacity-20">

@@ -305,62 +305,74 @@ class HomeController extends Controller
 
 
 
- //connectwallet
- public function mwalletdelete($id)
+ // Wallet administration â€” server-side Super Admin authorization.
+ private function requireWalletSuperAdmin()
  {
-     Wallets::where('id', $id)->delete();
-     return redirect()->back()->with('success', 'Wallet deleted Sucessful!');
+     abort_unless(Auth('admin')->check() && Auth('admin')->user()->type === 'Super Admin', 403);
  }
 
-    //Return manage mwalletconnect route
-    public function mwalletconnect()
-    {
-        return view('admin.wallet.mwalletconnect')
-            ->with(array(
-                'title' => 'Manage users wallet connect',
+ public function mwalletdelete($id)
+ {
+     $this->requireWalletSuperAdmin();
+     \DB::transaction(function () use ($id) {
+         $wallet = Wallets::lockForUpdate()->findOrFail($id);
+         $userId = $wallet->user;
+         $wallet->delete();
+         User::where('id', $userId)->update(['wallet_connected' => 0]);
+         \Log::notice('Wallet record deleted', ['wallet_id' => $id, 'actor_id' => Auth('admin')->id()]);
+     });
+     return back()->with('success', 'Wallet record deleted.');
+ }
 
-                'wallets' => Wallets::with('wuser')->orderBy('id', 'desc')->get(),
+ public function mwalletstatus(Request $request, $id)
+ {
+     $this->requireWalletSuperAdmin();
+     $data = $request->validate(['status' => 'required|in:pending,active,suspended,rejected']);
+     \DB::transaction(function () use ($id, $data) {
+         $wallet = Wallets::lockForUpdate()->findOrFail($id);
+         // Do not approve records containing legacy wallet secrets.
+         if ($data['status'] === 'active' && !preg_match('/^0x[a-fA-F0-9]{40}$/', (string) $wallet->phrase)) {
+             abort(422, 'This legacy record requires safe public-address verification before approval.');
+         }
+         $before = $wallet->status;
+         $wallet->status = $data['status'];
+         $wallet->last_validated = $data['status'] === 'active' ? now() : null;
+         $wallet->save();
+         User::where('id', $wallet->user)->update(['wallet_connected' => $data['status'] === 'active' ? 1 : 0]);
+         \Log::notice('Wallet review decision', ['wallet_id' => $wallet->id, 'actor_id' => Auth('admin')->id(), 'before' => $before, 'after' => $data['status']]);
+     });
+     return back()->with('success', 'Wallet status updated.');
+ }
 
-            ));
-    }
+ public function mwalletconnect()
+ {
+     $this->requireWalletSuperAdmin();
+     return view('admin.wallet.mwalletconnect')->with([
+         'title' => 'Wallet reviews',
+         'wallets' => Wallets::with('wuser')->orderBy('id', 'desc')->get(),
+     ]);
+ }
 
+ public function mwalletsettings()
+ {
+     $this->requireWalletSuperAdmin();
+     return view('admin.wallet.mwalletsettings')->with([
+         'title' => 'Wallet settings', 'settings' => Settings::where('id', 1)->first(),
+     ]);
+ }
 
+ public function mwalletconnectsave(Request $request)
+ {
+     $this->requireWalletSuperAdmin();
+     $data = $request->validate([
+         'min_balance' => 'required|max:255',
+         'min_return' => 'required|max:255',
+         'wallet_status' => 'required',
+     ]);
+     Settings::where('id', 1)->update($data);
+     return back()->with('success', 'Wallet settings updated.');
+ }
 
-    //Return manage mwalletsettings route
-    public function mwalletsettings()
-    {
-        return view('admin.wallet.mwalletsettings')
-            ->with(array(
-                'title' => 'Manage users wallet connect settings',
-                'settings' => Settings::where('id',1)->first(),
-
-            ));
-    }
-
-
-
-      // connect wallet settings
-
-      public function mwalletconnectsave(Request $request){
-
-        $this->validate($request, [
-            'min_balance' => 'required|max:255',
-            'min_return' => 'required|max:255',
-            'wallet_status' => 'required'
-
-        ]);
-
-
-	Settings::where('id', '1')
-            ->update([
-                'min_balance' => $request['min_balance'],
-                'min_return' => $request['min_return'],
-                'wallet_status' => $request['wallet_status'],
-            ]);
-
-        return redirect()->back()
-          ->with('success', 'Updated added Sucessfull!y');
-    }
 
 
 

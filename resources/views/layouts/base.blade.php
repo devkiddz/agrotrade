@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html lang="en" class="dark">
+<script>try { if (localStorage.getItem("darkMode") === "light") document.documentElement.classList.remove("dark"); } catch(e) {}</script>
 <head>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <meta charset="utf-8">
@@ -96,6 +97,11 @@
         }
 
         /* Light mode overrides */
+        /* Public navigation/footer light theme */
+        html:not(.dark) header { background: #fff; border-color: #e5e7eb; }
+        html:not(.dark) header .text-gray-200, html:not(.dark) header .text-gray-300 { color: #374151; }
+        html:not(.dark) footer { background: #f8fafc; }
+        html:not(.dark) footer .text-white { color: #111827; }
         html:not(.dark) {
             @apply bg-gray-100 text-gray-900;
         }
@@ -130,6 +136,36 @@
         html:not(.dark) .bg-dark-500 {
             @apply bg-gray-100;
         }
+
+/* AGROTRADE_UI_R2: public theme and compact language control */
+.agrotrade-language { position: relative; min-width: 66px; max-width: 76px; flex-shrink: 0; }
+.agrotrade-language .gtranslate_wrapper { width: 100%; }
+.agrotrade-language select { width: 100%; max-width: 76px; height: 35px; padding: 0 19px 0 8px; border: 1px solid #334155; border-radius: 9px; background: #1e293b; color: #f8fafc; font: 600 12px/1.2 Inter, sans-serif; cursor: pointer; color-scheme: dark; }
+.agrotrade-language select option { background: #1e293b; color: #f8fafc; }
+html:not(.dark) .agrotrade-language select { background: #f1f5f9; border-color: #cbd5e1; color: #0f172a; color-scheme: light; }
+html:not(.dark) .agrotrade-language select option { background: #fff; color: #0f172a; }
+.agrotrade-language select:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+html:not(.dark) .agrotrade-hero { background: linear-gradient(135deg, #f8fafc 0%, #e8f2ff 100%); }
+html:not(.dark) .agrotrade-hero h1 .text-white { color: #0f172a; }
+html:not(.dark) .agrotrade-hero p.text-gray-300 { color: #475569; }
+html:not(.dark) .agrotrade-hero a.bg-dark-200 { background: #fff; color: #0f172a; border-color: #cbd5e1; }
+html:not(.dark) .agrotrade-hero .text-primary { color: #2563eb; }
+html:not(.dark) .agrotrade-hero .bg-blue-900 { background-color: #dbeafe; }
+
+/* AGROTRADE_HERO_STICKY_R3: scoped public UI correction */
+header { position: sticky !important; top: 0; z-index: 60 !important; }
+/* Dark hero is preserved. Only light mode overrides its hard-coded colors. */
+html:not(.dark) .agrotrade-hero { background: linear-gradient(135deg,#f8fafc 0%,#e9f2ff 100%) !important; }
+html:not(.dark) .agrotrade-hero h1,
+html:not(.dark) .agrotrade-hero h1 .text-white { color: #0f172a !important; }
+html:not(.dark) .agrotrade-hero h1 .bg-clip-text { color: transparent !important; }
+html:not(.dark) .agrotrade-hero p.text-gray-300,
+html:not(.dark) .agrotrade-hero .space-y-6 > p { color: #475569 !important; }
+html:not(.dark) .agrotrade-hero .text-primary { color: #1d4ed8 !important; }
+html:not(.dark) .agrotrade-hero .bg-blue-900 { background-color: #dbeafe !important; }
+html:not(.dark) .agrotrade-hero a.bg-dark-200 { background: #fff !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+html:not(.dark) .agrotrade-hero a.bg-blue-600 { background-color: #2563eb !important; color: #fff !important; }
+/* Keep the market chart itself dark: TradingView is independently themed. */
     </style>
 
     <title>{{$settings->site_name}} | CFD Trading — Trading on Stocks, Gold, Oil, Indices</title>
@@ -170,7 +206,7 @@
 
             // Theme toggler
             Alpine.store('darkMode', {
-                on: true,
+                on: document.documentElement.classList.contains("dark"),
                 toggle() {
                     this.on = !this.on;
                     if (this.on) {
@@ -185,19 +221,6 @@
                     localStorage.setItem('darkMode', this.on ? 'dark' : 'light');
                 }
             });
-        });
-
-        // Initialize theme from local storage
-        document.addEventListener('DOMContentLoaded', () => {
-            const theme = localStorage.getItem('darkMode');
-            if (theme === 'light') {
-                document.documentElement.classList.remove('dark');
-                document.body.classList.remove('bg-gray-900');
-                document.body.classList.add('bg-gray-100');
-                if (window.Alpine) {
-                    Alpine.store('darkMode').on = false;
-                }
-            }
         });
     </script>
 </head>
@@ -228,7 +251,7 @@
 
 
     <!-- Header -->
-<header class="bg-gray-900 border-b border-gray-800 relative z-50">
+<header class="bg-gray-900 border-b border-gray-800 relative z-50 agrotrade-sticky-nav">
     <!-- Top Navigation Bar -->
     <div x-data="{ mobileMenuOpen: false }" class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div class="relative">
@@ -291,6 +314,8 @@
                     <a href="contacts" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-200 hover:text-white">Contact</a>
                 </nav>
 
+                <!-- Shared language selector -->
+                <div class="agrotrade-language flex items-center mr-2">@include('layouts.lang')</div>
                 <!-- Right Navigation -->
                 <div class="hidden md:flex items-center">
                     <div class="flex space-x-1 mr-4">
@@ -312,15 +337,11 @@
                  
 
                     <!-- Dark/Light Mode Toggle -->
-                    <!--<button-->
-                    <!--    x-data-->
-                    <!--    @click="$store.darkMode.toggle()"-->
-                    <!--    class="p-2 text-gray-400 hover:text-gray-200 mr-4 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600"-->
-                    <!--    aria-label="Toggle dark/light mode"-->
-                    <!-->-->
-                    <!--    <i x-show="$store.darkMode.on" class="fas fa-sun"></i>-->
-                    <!--    <i x-show="!$store.darkMode.on" class="fas fa-moon"></i>-->
-                    <!--</button>-->
+<button type="button" x-data @click="$store.darkMode.toggle()" class="p-2 mr-2 rounded-md text-gray-400 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Toggle color theme" :aria-pressed="$store.darkMode.on.toString()">
+  <i x-show="$store.darkMode.on" class="fas fa-sun" aria-hidden="true"></i>
+  <i x-show="!$store.darkMode.on" class="fas fa-moon" aria-hidden="true"></i>
+</button>
+
 
                     <div class="flex items-center space-x-4">
                         <a href="login" class="text-gray-200 hover:text-white flex items-center">
@@ -336,15 +357,11 @@
                 <!-- Mobile menu button and theme toggle -->
                 <div class="flex md:hidden items-center space-x-2">
                     <!-- Mobile Theme Toggle -->
-                    <!--<button-->
-                    <!--    x-data-->
-                    <!--    @click="$store.darkMode.toggle()"-->
-                    <!--    class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"-->
-                    <!--    aria-label="Toggle dark/light mode"-->
-                    <!-->-->
-                    <!--    <i x-show="$store.darkMode.on" class="fas fa-sun text-lg"></i>-->
-                    <!--    <i x-show="!$store.darkMode.on" class="fas fa-moon text-lg"></i>-->
-                    <!--</button>-->
+<button type="button" x-data @click="$store.darkMode.toggle()" class="p-2 mr-2 rounded-md text-gray-400 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Toggle color theme" :aria-pressed="$store.darkMode.on.toString()">
+  <i x-show="$store.darkMode.on" class="fas fa-sun" aria-hidden="true"></i>
+  <i x-show="!$store.darkMode.on" class="fas fa-moon" aria-hidden="true"></i>
+</button>
+
 
                     <!-- Mobile Menu Toggle -->
                     <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
@@ -586,7 +603,7 @@
         </div>
     </div>
     
-    @include('layouts.lang')
+
 </footer>
 
 <!-- Sticky Market Ticker Widget -->
@@ -733,5 +750,30 @@
 </script>
 
 @include('layouts.livechat')
+<script>
+/* Preserve GTranslate language values; abbreviate only option labels. */
+(function () {
+  const names = { english:'EN', french:'FR', spanish:'ES', german:'DE', portuguese:'PT', arabic:'AR', chinese:'ZH', 'chinese (simplified)':'ZH', 'chinese (traditional)':'ZH-TW', japanese:'JA', korean:'KO', italian:'IT', russian:'RU', hindi:'HI', dutch:'NL', turkish:'TR', swahili:'SW', hausa:'HA', yoruba:'YO', igbo:'IG' };
+  function shorten() {
+    document.querySelectorAll('.agrotrade-language select').forEach(function (select) {
+      Array.from(select.options).forEach(function (option) {
+        if (!option.dataset.fullLanguage) option.dataset.fullLanguage = option.textContent.trim();
+        const full = option.dataset.fullLanguage;
+        const code = option.value.trim().split('|').pop();
+        const abbreviation = /^[a-z]{2,3}(-[a-z]{2,4})?$/i.test(code) ? code.toUpperCase() : (names[full.toLowerCase()] || full.slice(0, 2).toUpperCase());
+        if (option.textContent !== abbreviation) option.textContent = abbreviation;
+        option.title = full;
+      });
+      select.setAttribute('aria-label', 'Select translation language');
+      select.title = 'Select language';
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    shorten();
+    const target = document.querySelector('.agrotrade-language');
+    if (target) new MutationObserver(shorten).observe(target, { childList: true, subtree: true });
+  });
+})();
+</script>
 </body>
 </html>

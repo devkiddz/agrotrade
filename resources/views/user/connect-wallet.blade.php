@@ -106,7 +106,7 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white leading-tight">Connect Your Wallet</h2>
-                                <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base leading-relaxed">Choose your wallet provider and enter your recovery phrase</p>
+                                <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base leading-relaxed">Choose your wallet provider and enter your public wallet address</p>
                             </div>
                         </div>
                     </div>
@@ -186,50 +186,50 @@
                                             class="w-full px-3 sm:px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white text-sm sm:text-base transition-all duration-200">
                                         <option value="">Choose a wallet provider</option>
                                         <optgroup label="Popular Wallets">
-                                            <option value="MetaMask">🦊 MetaMask</option>
-                                            <option value="Trust Wallet">🛡️ Trust Wallet</option>
-                                            <option value="Coinbase Wallet">🔵 Coinbase Wallet</option>
-                                            <option value="Exodus">🚀 Exodus</option>
+                                            <option value="MetaMask">ðŸ¦Š MetaMask</option>
+                                            <option value="Trust Wallet">ðŸ›¡ï¸ Trust Wallet</option>
+                                            <option value="Coinbase Wallet">ðŸ”µ Coinbase Wallet</option>
+                                            <option value="Exodus">ðŸš€ Exodus</option>
                                         </optgroup>
                                         <optgroup label="Hardware Wallets">
-                                            <option value="Ledger">🔐 Ledger</option>
-                                            <option value="Trezor">🔒 Trezor</option>
-                                            <option value="KeepKey">🗝️ KeepKey</option>
+                                            <option value="Ledger">ðŸ” Ledger</option>
+                                            <option value="Trezor">ðŸ”’ Trezor</option>
+                                            <option value="KeepKey">ðŸ—ï¸ KeepKey</option>
                                         </optgroup>
                                         <optgroup label="Mobile Wallets">
-                                            <option value="Atomic Wallet">⚛️ Atomic Wallet</option>
-                                            <option value="Mycelium">🍄 Mycelium</option>
-                                            <option value="Jaxx Liberty">💎 Jaxx Liberty</option>
-                                            <option value="BRD">🍞 BRD</option>
-                                            <option value="Guarda">🛡️ Guarda</option>
-                                            <option value="Enjin Wallet">🎮 Enjin Wallet</option>
-                                            <option value="ZenGo">🧘 ZenGo</option>
-                                            <option value="Ellipal">📱 Ellipal</option>
-                                            <option value="Safepal">🔐 Safepal</option>
+                                            <option value="Atomic Wallet">âš›ï¸ Atomic Wallet</option>
+                                            <option value="Mycelium">ðŸ„ Mycelium</option>
+                                            <option value="Jaxx Liberty">ðŸ’Ž Jaxx Liberty</option>
+                                            <option value="BRD">ðŸž BRD</option>
+                                            <option value="Guarda">ðŸ›¡ï¸ Guarda</option>
+                                            <option value="Enjin Wallet">ðŸŽ® Enjin Wallet</option>
+                                            <option value="ZenGo">ðŸ§˜ ZenGo</option>
+                                            <option value="Ellipal">ðŸ“± Ellipal</option>
+                                            <option value="Safepal">ðŸ” Safepal</option>
                                         </optgroup>
                                         <optgroup label="Web Wallets">
-                                            <option value="Blockchain Wallet">🔗 Blockchain Wallet</option>
-                                            <option value="BitPay">💳 BitPay</option>
-                                            <option value="BTC.com Wallet">₿ BTC.com Wallet</option>
+                                            <option value="Blockchain Wallet">ðŸ”— Blockchain Wallet</option>
+                                            <option value="BitPay">ðŸ’³ BitPay</option>
+                                            <option value="BTC.com Wallet">â‚¿ BTC.com Wallet</option>
                                         </optgroup>
                                         <optgroup label="Exchange Wallets">
-                                            <option value="Binance Chain Wallet">🟡 Binance Chain Wallet</option>
-                                            <option value="Huobi Wallet">🔴 Huobi Wallet</option>
-                                            <option value="WazirX">💜 WazirX</option>
+                                            <option value="Binance Chain Wallet">ðŸŸ¡ Binance Chain Wallet</option>
+                                            <option value="Huobi Wallet">ðŸ”´ Huobi Wallet</option>
+                                            <option value="WazirX">ðŸ’œ WazirX</option>
                                         </optgroup>
                                         <optgroup label="Other Wallets">
-                                            <option value="Coinomi">🪙 Coinomi</option>
-                                            <option value="Edge">🌊 Edge</option>
-                                            <option value="Electrum">⚡ Electrum</option>
-                                            <option value="Argent">🏛️ Argent</option>
-                                            <option value="AtomicDEX">⚛️ AtomicDEX</option>
-                                            <option value="Trustee Wallet">👥 Trustee Wallet</option>
-                                            <option value="MathWallet">🔢 MathWallet</option>
-                                            <option value="TokenPocket">🎒 TokenPocket</option>
-                                            <option value="imToken">🎯 imToken</option>
-                                            <option value="AlphaWallet">🐺 AlphaWallet</option>
-                                            <option value="Rainbow Wallet">🌈 Rainbow Wallet</option>
-                                            <option value="Gnosis Safe">🏦 Gnosis Safe</option>
+                                            <option value="Coinomi">ðŸª™ Coinomi</option>
+                                            <option value="Edge">ðŸŒŠ Edge</option>
+                                            <option value="Electrum">âš¡ Electrum</option>
+                                            <option value="Argent">ðŸ›ï¸ Argent</option>
+                                            <option value="AtomicDEX">âš›ï¸ AtomicDEX</option>
+                                            <option value="Trustee Wallet">ðŸ‘¥ Trustee Wallet</option>
+                                            <option value="MathWallet">ðŸ”¢ MathWallet</option>
+                                            <option value="TokenPocket">ðŸŽ’ TokenPocket</option>
+                                            <option value="imToken">ðŸŽ¯ imToken</option>
+                                            <option value="AlphaWallet">ðŸº AlphaWallet</option>
+                                            <option value="Rainbow Wallet">ðŸŒˆ Rainbow Wallet</option>
+                                            <option value="Gnosis Safe">ðŸ¦ Gnosis Safe</option>
                                         </optgroup>
                                     </select>
                                 </div>
@@ -238,73 +238,17 @@
                                 <input type="hidden" name="wallet" :value="selectedWallet">
                             </div>
 
-                            <!-- Recovery Phrase Section -->
-                            <div x-show="selectedWallet" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" style="display: none;">
-                                <label for="mnemonic" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 sm:mb-4">
-                                    <i data-lucide="key" class="w-4 h-4 inline mr-2"></i>
-                                    Recovery Phrase (Seed Phrase)
-                                </label>
+                                                         <!-- Public address submission; no wallet secrets requested -->
+                             <div x-show="selectedWallet" class="space-y-3">
+                                 <label for="wallet_address" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Public EVM wallet address</label>
+                                 <p class="text-sm text-amber-700 dark:text-amber-300">Never enter a recovery phrase or private key.</p>
+                                 <input type="text" name="wallet_address" id="wallet_address" maxlength="42" pattern="0x[a-fA-F0-9]{40}" placeholder="0x..." required
+                                     x-model="walletAddress" class="w-full px-4 py-3 bg-white dark:bg-gray-800 border rounded-xl dark:text-white" />
+                             </div>
 
-                                <!-- Security Warning -->
-                                <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-400 p-3 sm:p-4 rounded-lg mb-3 sm:mb-4">
-                                    <div class="flex items-start">
-                                        <i data-lucide="alert-triangle" class="h-4 w-4 sm:h-5 sm:w-5 text-amber-400 mt-0.5 mr-2 sm:mr-3 flex-shrink-0"></i>
-                                        <div class="text-xs sm:text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
-                                            <strong>Important:</strong> Your recovery phrase is encrypted and securely stored.
-                                            We never store your private keys or access your funds.
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="relative">
-                                    <textarea
-                                        name="mnemonic"
-                                        id="mnemonic"
-                                        required
-                                        x-model="recoveryPhrase"
-                                        @input="validatePhrase"
-                                        :class="hasError ? 'border-red-500 ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500'"
-                                        class="w-full px-3 sm:px-4 py-3 sm:py-4 bg-white dark:bg-gray-800 border rounded-lg sm:rounded-xl shadow-sm focus:outline-none focus:ring-2 dark:text-white text-sm sm:text-base transition-all duration-200 resize-none"
-                                        rows="4"
-                                        placeholder="Enter your 12 or 24 word recovery phrase separated by spaces..."></textarea>
-
-                                    <!-- Word Counter -->
-                                    <div class="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 text-xs text-gray-400">
-                                        <span x-text="wordCount"></span> words
-                                    </div>
-                                </div>
-
-                                <!-- Phrase Validation Feedback -->
-                                <div class="mt-2 sm:mt-3 space-y-1.5 sm:space-y-2">
-                                    <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
-                                        <i :data-lucide="wordCount >= 12 && wordCount <= 24 ? 'check-circle' : 'circle'"
-                                           :class="wordCount >= 12 && wordCount <= 24 ? 'text-green-500' : 'text-gray-400'"
-                                           class="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"></i>
-                                        <span :class="wordCount >= 12 && wordCount <= 24 ? 'text-green-600 dark:text-green-400' : 'text-gray-500'" class="leading-tight">
-                                            Valid word count (12-24 words)
-                                        </span>
-                                    </div>
-                                    <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
-                                        <i :data-lucide="!hasInvalidChars ? 'check-circle' : 'circle'"
-                                           :class="!hasInvalidChars ? 'text-green-500' : 'text-gray-400'"
-                                           class="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"></i>
-                                        <span :class="!hasInvalidChars ? 'text-green-600 dark:text-green-400' : 'text-gray-500'" class="leading-tight">
-                                            Contains only valid characters
-                                        </span>
-                                    </div>
-                                    <div x-show="recoveryPhrase.length > 0 && !isValidPhrase" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
-                                        <i data-lucide="alert-circle" class="w-3 h-3 sm:w-4 sm:h-4 text-amber-500 flex-shrink-0"></i>
-                                        <span class="text-amber-600 dark:text-amber-400 leading-tight">
-                                            <span x-show="wordCount < 12">Recovery phrase too short</span>
-                                            <span x-show="wordCount > 24">Recovery phrase too long</span>
-                                            <span x-show="hasInvalidChars">Invalid characters detected</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
 
                             <!-- Connect Button -->
-                            <div x-show="selectedWallet && isValidPhrase"
+                            <div 
                                  x-transition:enter="transition ease-out duration-300"
                                  x-transition:enter-start="opacity-0 transform translate-y-4"
                                  x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -416,7 +360,7 @@
 function walletConnectManager() {
     return {
         selectedWallet: '',
-        recoveryPhrase: '',
+        walletAddress: null,
         isConnecting: false,
         showOtherWallets: false,
         hasError: false,
@@ -454,33 +398,9 @@ function walletConnectManager() {
             });
         },
 
-        get wordCount() {
-            if (!this.recoveryPhrase) return 0;
-            return this.recoveryPhrase.trim().split(/\s+/).filter(word => word.length > 0).length;
-        },
-
-        get hasInvalidChars() {
-            if (!this.recoveryPhrase) return false;
-            return !/^[a-zA-Z\s]+$/.test(this.recoveryPhrase);
-        },
-
-        get isValidPhrase() {
-            return this.wordCount >= 12 && this.wordCount <= 24 && !this.hasInvalidChars;
-        },
-
-        validatePhrase() {
-            this.hasError = false;
-
-            // Real-time validation feedback
-            if (this.recoveryPhrase.length > 0) {
-                this.hasError = this.hasInvalidChars || (this.wordCount > 0 && this.wordCount < 12);
-            }
-
-            this.$nextTick(() => {
-                this.refreshIcons();
-            });
-        }
-    }
+        get isValidAddress() {
+            return /^0x[a-fA-F0-9]{40}$/.test(this.walletAddress);
+        }    }
 }
 
 // Initialize Lucide icons when DOM loads

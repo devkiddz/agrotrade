@@ -219,7 +219,8 @@ Route::middleware(['isadmin', '2fa'])->prefix('admin')->group(function () {
 
 	Route::get('dashboard/mwalletconnect',  [HomeController::class, 'mwalletconnect'])->name('mwalletconnect');
 	Route::get('dashboard/mwalletsettings',  [HomeController::class, 'mwalletsettings'])->name('mwalletsettings');
-	Route::get('dashboard/mwalletdelete/{id}', [HomeController::class, 'mwalletdelete']);
+	Route::post('dashboard/mwalletdelete/{id}', [HomeController::class, 'mwalletdelete'])->name('wallet.delete');
+    Route::post('dashboard/mwalletstatus/{id}', [HomeController::class, 'mwalletstatus'])->name('wallet.status');
 	Route::post('dashboard/mwalletconnectsave', [HomeController::class, 'mwalletconnectsave']);
 
 
