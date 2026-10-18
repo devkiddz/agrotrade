@@ -1,4 +1,4 @@
-/* Agrotrade Admin Polish Pass 1: conservative, theme-aware enhancements. */
+﻿/* Agrotrade Admin Polish Pass 1: conservative, theme-aware enhancements. */
 /* Intentionally no body/background or global palette overrides. */
 .wrapper .sidebar .nav.nav-primary > .nav-item > a {
   border-radius: 9px;
@@ -27,4 +27,111 @@
 @media (max-width: 767px) {
   .wrapper .main-panel .page-inner { padding-left: 12px; padding-right: 12px; }
   .wrapper .main-panel .table-responsive { overflow-x: auto; }
+}
+
+/* AGROTRADE_VISUAL_CLEANUP_R1 */
+/* Customer-inspired visual rhythm, scoped to the existing admin shell.
+   No changes to theme colors, navigation, financial data or interactions. */
+.wrapper .main-panel .page-inner { padding-left: 24px; padding-right: 24px; }
+.wrapper .main-panel .card { border: 1px solid rgba(148,163,184,.18); box-shadow: 0 2px 12px rgba(15,23,42,.055); }
+.wrapper .main-panel .card .card-body { min-width: 0; }
+.wrapper .main-panel .card .card-title { line-height: 1.35; }
+.wrapper .main-panel .table-responsive { max-width: 100%; }
+.wrapper .main-panel .table th, .wrapper .main-panel .table td { overflow-wrap: anywhere; }
+.wrapper .main-panel .form-control:focus { outline-offset: 2px; }
+/* Dashboard-specific spacing and readable metrics; other admin views untouched. */
+.wrapper .main-panel .modern-stat-card { border-left: 1px solid rgba(148,163,184,.18); min-width: 0; }
+.wrapper .main-panel .modern-stat-card .card-body { padding: 20px !important; }
+.wrapper .main-panel .modern-stat-card .d-flex.align-items-center { gap: 14px; min-width: 0; }
+.wrapper .main-panel .modern-stat-card .flex-grow-1 { min-width: 0; margin-left: 0 !important; }
+.wrapper .main-panel .modern-stat-card .stat-icon { width: 46px; height: 46px; min-width: 46px; font-size: 1.2rem; border-radius: 11px; }
+.wrapper .main-panel .modern-stat-card p { line-height: 1.4; margin-bottom: 7px !important; }
+.wrapper .main-panel .modern-stat-card h4 { font-size: clamp(1.15rem, 1.5vw, 1.55rem); line-height: 1.3; overflow-wrap: anywhere; }
+.wrapper .main-panel .modern-stat-card small { display: inline-block; margin-top: 6px; line-height: 1.4; }
+.wrapper .main-panel .modern-stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15,23,42,.10) !important; }
+.wrapper .main-panel .modern-stat-card:hover .stat-icon { transform: none; }
+.wrapper .main-panel .panel-header .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.wrapper .main-panel .panel-header .btn-group .btn { margin: 0; white-space: nowrap; }
+.wrapper .main-panel .chart-container { max-width: 100%; }
+@media (max-width: 991px) {
+  .wrapper .main-panel .page-inner { padding-left: 16px; padding-right: 16px; }
+  .wrapper .main-panel .modern-stat-card .card-body { padding: 16px !important; }
+}
+@media (max-width: 575px) {
+  .wrapper .main-panel .modern-stat-card .stat-icon { width: 40px; height: 40px; min-width: 40px; }
+  .wrapper .main-panel .panel-header .btn-group .btn { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wrapper .main-panel .modern-stat-card, .wrapper .main-panel .modern-stat-card .stat-icon { transition: none; }
+  .wrapper .main-panel .modern-stat-card:hover { transform: none; }
+}
+
+/* AGROTRADE_ADMIN_REFINEMENT_R2 */
+/* Dashboard-only visual refinement. :has() scopes changes to the dashboard
+   without adding markup or changing existing routes, features or theme settings. */
+@supports selector(.main-panel:has(.modern-stat-card)) {
+  .wrapper .main-panel:has(.modern-stat-card) .panel-header > .page-inner {
+    padding-top: 24px !important;
+    padding-bottom: 45px !important;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .panel-header h2 {
+    margin-bottom: 8px;
+    line-height: 1.3;
+    letter-spacing: -.02em;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .panel-header h5,
+  .wrapper .main-panel:has(.modern-stat-card) .panel-header p {
+    line-height: 1.55;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .panel-header h2 i,
+  .wrapper .main-panel:has(.modern-stat-card) .panel-header h5 i,
+  .wrapper .main-panel:has(.modern-stat-card) .panel-header p i,
+  .wrapper .main-panel:has(.modern-stat-card) .modern-stat-card small i,
+  .wrapper .main-panel:has(.modern-stat-card) .card-header h5 i {
+    margin-right: 7px !important;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .modern-stat-card {
+    height: auto !important;
+    min-height: 138px;
+    box-shadow: 0 3px 14px rgba(15,23,42,.07) !important;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .modern-stat-card .card-body {
+    padding: 16px 18px !important;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .modern-stat-card p {
+    margin-bottom: 5px !important;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .modern-stat-card small {
+    margin-top: 5px;
+    overflow-wrap: anywhere;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .modern-stat-card .stat-icon {
+    flex-shrink: 0;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .panel-header .btn-group .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 40px;
+    padding: 8px 14px;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .panel-header .btn-group .btn i {
+    margin-right: 2px !important;
+  }
+  .wrapper .main-panel:has(.modern-stat-card) .card-header h5 {
+    line-height: 1.45;
+  }
+  @media (max-width: 767px) {
+    .wrapper .main-panel:has(.modern-stat-card) .panel-header > .page-inner {
+      padding-top: 18px !important;
+      padding-bottom: 40px !important;
+    }
+    .wrapper .main-panel:has(.modern-stat-card) .modern-stat-card {
+      min-height: 118px;
+    }
+    .wrapper .main-panel:has(.modern-stat-card) .modern-stat-card .card-body {
+      padding: 14px 16px !important;
+    }
+  }
 }
