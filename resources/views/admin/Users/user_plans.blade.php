@@ -39,19 +39,21 @@ if (Auth('admin')->User()->dashboard_style == 'light') {
                                             <th>Duration</th>
                                             <th>Created on</th>
                                             <th>Expire At</th>
-                                            <th>Profit/Loss</th>
-                                            <th>Option</th>
+                                            <th>Actions</th>
                                             
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($plans as $plan)
+                                            @php $controlState = $tradeControls[$plan->id] ?? 'active'; @endphp
                                             <tr>
                                                 {{-- <td>{{$plan->duser->name}}</td> --}}
                                                 <td>{{ $plan->assets }}</td>
                                                 <td>{{ $user->currency }}{{ number_format($plan->amount) }}</td>
                                                 <td>
-                                                    @if ($plan->active == 'yes')
+                                                    @if ($controlState !== 'active')
+                                                        <span class="badge badge-warning">{{ ucfirst($controlState) }}</span>
+                                                    @elseif ($plan->active == 'yes')
                                                         <span class="badge badge-success">{{ $plan->active }}</span>
                                                     @else
                                                         <span class="badge badge-danger">{{ $plan->active }}</span>
@@ -75,27 +77,51 @@ if (Auth('admin')->User()->dashboard_style == 'light') {
                                                 <td>{{ \Carbon\Carbon::parse($plan->expire_date)->toDayDateTimeString() }}
                                                 </td>
 
-                                                <td>
-                                                
-                                                    @if ($plan->active == 'yes')
-                                                    <a href="{{ route('markprofit', $plan->id) }}"
-                                                        class="m-1 btn btn-success btn-sm"> Mark as Profit</a>
-                                                        <a href="{{ route('markloss', $plan->id) }}"
-                                                            class="m-1 btn btn-danger btn-sm"> Mark as loss</a>
+                                                                                                <td>
+                                                    @php
+                                                        $investmentState = $tradeControls[$plan->id] ?? 'active';
+                                                        $isActiveInvestment = $plan->active === 'yes' && $investmentState === 'active';
+                                                        $isPausedInvestment = $plan->active === 'yes' && $investmentState === 'paused';
+                                                    @endphp
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                                                        <div class="dropdown-menu dropdown-menu-right shadow-sm" style="min-width: 190px; z-index: 1100;">
+                                                            @if ($isActiveInvestment)
+                                                                <form method="post" action="{{ route('admin.investment-controls.update', ['type' => 'modern', 'id' => $plan->id]) }}" onsubmit="return agrotradeInvestmentReason(this, 'Pause');">
+                                                                    @csrf
+                                                                    <input type="hidden" name="action" value="pause"><input type="hidden" name="reason" value="">
+                                                                    <button type="submit" class="dropdown-item text-warning">Pause investment</button>
+                                                                </form>
+                                                            @elseif ($isPausedInvestment)
+                                                                <form method="post" action="{{ route('admin.investment-controls.update', ['type' => 'modern', 'id' => $plan->id]) }}" onsubmit="return agrotradeInvestmentReason(this, 'Resume');">
+                                                                    @csrf
+                                                                    <input type="hidden" name="action" value="resume"><input type="hidden" name="reason" value="">
+                                                                    <button type="submit" class="dropdown-item text-success">Resume investment</button>
+                                                                </form>
                                                             @endif
-                                            </td>
-                                                <td>
-                                                    
-                                                    @if ($plan->active == 'yes')
-                                                        <a href="{{ route('markas', ['id' => $plan->id, 'status' => 'expired']) }}"
-                                                            class="m-1 btn btn-danger btn-sm">Mark as expired</a>
-                                                    @else
-                                                        <a href="{{ route('markas', ['id' => $plan->id, 'status' => 'yes']) }}"
-                                                            class="m-1 btn btn-success btn-sm">Mark as active</a>
-                                                    @endif
-
-                                                    <a href="{{ route('deleteplan', $plan->id) }}"
-                                                        class="m-1 btn btn-info btn-sm"> Delete Trade</a>  
+                                                            @if ($isActiveInvestment || $isPausedInvestment)
+                                                                <form method="post" action="{{ route('admin.investment-controls.update', ['type' => 'modern', 'id' => $plan->id]) }}" onsubmit="return agrotradeInvestmentReason(this, 'Mark Completed');">
+                                                                    @csrf
+                                                                    <input type="hidden" name="action" value="complete"><input type="hidden" name="reason" value="">
+                                                                    <button type="submit" class="dropdown-item">Mark completed</button>
+                                                                </form>
+                                                            @endif
+                                                                                                                        @if ($isActiveInvestment)
+                                                                <div class="dropdown-divider"></div>
+                                                                <a href="{{ route('markprofit', $plan->id) }}" class="dropdown-item" onclick="return confirm('Mark this trade as profit? This may change customer balances.');">Mark as profit</a>
+                                                                <a href="{{ route('markloss', $plan->id) }}" class="dropdown-item" onclick="return confirm('Mark this trade as loss? This may change customer balances.');">Mark as loss</a>
+                                                            @endif
+                                                            @if ($investmentState === 'completed')
+                                                                <span class="dropdown-item-text text-muted">Completed · read only</span>
+                                                            @elseif (!$isActiveInvestment && !$isPausedInvestment)
+                                                                <span class="dropdown-item-text text-muted">{{ ucfirst($investmentState) }}</span>
+                                                            @endif
+                                                            @if ($investmentState !== 'completed')
+                                                                <div class="dropdown-divider"></div>
+                                                                <a href="{{ route('deleteplan', $plan->id) }}" class="dropdown-item text-danger" onclick="return confirm('Delete this investment record?');">Delete trade</a>
+                                                            @endif
+                                                        </div>
+                                                    </div>
                                                 </td>
 
                                             
@@ -108,4 +134,16 @@ if (Auth('admin')->User()->dashboard_style == 'light') {
                 </div>
             </div>
         </div>
+    {{-- AGROTRADE_FINAL_ACTION_MENU_R3 --}}
+    <script>
+    function agrotradeInvestmentReason(form, label) {
+        var reason = window.prompt(label + ' — reason (5–1000 characters):');
+        if (reason === null) return false;
+        reason = reason.trim();
+        if (reason.length < 5 || reason.length > 1000) { window.alert('Reason must contain 5–1000 characters.'); return false; }
+        if (!window.confirm('Confirm: ' + label + ' this investment?')) return false;
+        form.elements['reason'].value = reason;
+        return true;
+    }
+    </script>
     @endsection

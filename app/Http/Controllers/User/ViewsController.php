@@ -123,7 +123,7 @@ class ViewsController extends Controller
         // Legacy route name retained. Only a public EVM address is accepted.
         $data = $request->validate([
             'wallet' => 'required|string|max:100',
-            'wallet_address' => ['required', 'string', 'regex:/^0x[a-fA-F0-9]{40}$/'],
+            'wallet_address' => ['required', 'string', 'max:255'],
         ]);
         $user = Auth::user();
         $wallet = Wallets::where('user', $user->id)->first();

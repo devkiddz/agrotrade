@@ -47,7 +47,7 @@ class InvestmentControlController extends Controller
         abort_unless($this->ready(), 503, 'Investment controls migration is pending.');
         abort_unless(Auth::guard('admin')->check(), 403);
         $data = $request->validate([
-            'action' => ['required', Rule::in(['pause', 'resume', 'suspend', 'reinstate', 'flag', 'clear_flag'])],
+            'action' => ['required', Rule::in(['pause', 'resume', 'suspend', 'reinstate', 'flag', 'clear_flag', 'complete'])],
             'reason' => ['required', 'string', 'min:5', 'max:1000'],
         ]);
         $table = $type === 'legacy' ? 'investments' : 'user_plans';
@@ -60,15 +60,20 @@ class InvestmentControlController extends Controller
             $prior = DB::table('agrotrade_investment_controls')->where('investment_type', $type)
                 ->where('investment_id', $id)->lockForUpdate()->first();
             $current = $prior ? $prior->state : 'active';
+            abort_unless($investment->active === 'yes', 409, 'Only ongoing investments can be paused, resumed or completed.');
             $transitions = [
-                'active' => ['pause' => 'paused', 'suspend' => 'suspended', 'flag' => 'flagged'],
-                'paused' => ['resume' => 'active', 'suspend' => 'suspended', 'flag' => 'flagged'],
-                'suspended' => ['reinstate' => 'active', 'flag' => 'flagged'],
-                'flagged' => ['clear_flag' => 'active', 'suspend' => 'suspended'],
+                'active' => ['pause' => 'paused', 'suspend' => 'suspended', 'flag' => 'flagged', 'complete' => 'completed'],
+                'paused' => ['resume' => 'active', 'suspend' => 'suspended', 'flag' => 'flagged', 'complete' => 'completed'],
+                'suspended' => ['reinstate' => 'active', 'flag' => 'flagged', 'complete' => 'completed'],
+                'flagged' => ['clear_flag' => 'active', 'suspend' => 'suspended', 'complete' => 'completed'],
             ];
             $next = $transitions[$current][$data['action']] ?? null;
             if ($next === null) {
                 throw \Illuminate\Validation\ValidationException::withMessages(['action' => 'Invalid state transition from ' . $current]);
+            }
+            if ($data['action'] === 'complete') {
+                // Administrative closure only: never credit balances or trigger settlement.
+                DB::table($table)->where('id', $id)->update(['active' => 'expired']);
             }
             $values = ['state' => $next, 'reason' => $data['reason'], 'updated_by' => $actor, 'updated_at' => now()];
             if ($prior) {
@@ -84,6 +89,6 @@ class InvestmentControlController extends Controller
                 'reason' => $data['reason'], 'created_at' => now(),
             ]);
         }, 3);
-        return redirect()->route('admin.investment-controls.index')->with('success', 'Investment control updated.');
+        return redirect()->back()->with('success', 'Investment control updated.');
     }
 }

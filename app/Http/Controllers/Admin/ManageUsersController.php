@@ -100,11 +100,19 @@ class ManageUsersController extends Controller
 
     public function markplanas($status, $id)
     {
-        User_plans::where('id', $id)->update([
-            'active' => $status,
-        ]);
-        return redirect()->back()
-            ->with('success', "Plan Active state changed to $status");
+        // Legacy GET links cannot bypass administrative pause or completed closure.
+        abort_unless(in_array($status, ['yes', 'expired'], true), 422);
+        abort_unless(\Illuminate\Support\Facades\Schema::hasTable('agrotrade_investment_controls'), 503);
+        DB::transaction(function () use ($status, $id) {
+            $trade = User_plans::whereKey($id)->lockForUpdate()->firstOrFail();
+            $state = DB::table('agrotrade_investment_controls')
+                ->where('investment_type', 'modern')->where('investment_id', $trade->id)->value('state');
+            abort_if($state !== null && $state !== 'active', 409, 'Investment is paused, suspended or completed.');
+            abort_if($trade->active === 'expired' && $status === 'yes', 409, 'Closed trades cannot be reactivated here.');
+            $trade->active = $status;
+            $trade->save();
+        }, 3);
+        return redirect()->back()->with('success', 'Trade status updated.');
     }
     public function markloanas($status, $id)
     {
@@ -789,10 +797,20 @@ public function withdrawalcode(Request $request)
         return redirect()->back()->with('success', 'Your message was sent successfully!');
     }
 
+    private function assertTradeActionAllowed($id): void
+    {
+        abort_unless(\Illuminate\Support\Facades\Schema::hasTable('agrotrade_investment_controls'), 503);
+        $trade = User_plans::findOrFail($id);
+        abort_unless($trade->active === 'yes', 409, 'Trade is not active.');
+        $state = DB::table('agrotrade_investment_controls')
+            ->where('investment_type', 'modern')->where('investment_id', $trade->id)->value('state');
+        abort_if($state !== null && $state !== 'active', 409, 'Trade is paused, suspended or completed.');
+    }
+
     // mark user trade as profit
     public function markprofit($id)
     {
-
+        $this->assertTradeActionAllowed($id);
         $trade = User_plans::where('id', $id)->first();
 
         $user = User::find($trade->user);
@@ -820,6 +838,7 @@ public function withdrawalcode(Request $request)
     // Mark user trade as loss
     public function markloss($id)
     {
+        $this->assertTradeActionAllowed($id);
         $trade = User_plans::where('id', $id)->first();
         $user = User::find($trade->user);
         $account_bal = $user->account_bal;

@@ -331,7 +331,7 @@ class HomeController extends Controller
      \DB::transaction(function () use ($id, $data) {
          $wallet = Wallets::lockForUpdate()->findOrFail($id);
          // Do not approve records containing legacy wallet secrets.
-         if ($data['status'] === 'active' && !preg_match('/^0x[a-fA-F0-9]{40}$/', (string) $wallet->phrase)) {
+         if ($data['status'] === 'active' && trim((string) $wallet->phrase) === '') {
              abort(422, 'This legacy record requires safe public-address verification before approval.');
          }
          $before = $wallet->status;
@@ -393,6 +393,7 @@ class HomeController extends Controller
         return view('admin.Users.user_plans')
             ->with(array(
                 'plans' => User_plans::where('user', $id)->orderBy('id', 'desc')->get(),
+                'tradeControls' => DB::table('agrotrade_investment_controls')->where('investment_type', 'modern')->pluck('state', 'investment_id'),
                 'user' => User::where('id', $id)->first(),
                 'title' => 'User Investment trades',
 
@@ -405,6 +406,7 @@ class HomeController extends Controller
         return view('admin.Users.user_investments')
             ->with(array(
                 'plans' => investment::where('user', $id)->orderBy('id', 'desc')->get(),
+                'tradeControls' => DB::table('agrotrade_investment_controls')->where('investment_type', 'legacy')->pluck('state', 'investment_id'),
                 'user' => User::where('id', $id)->first(),
                 'title' => 'User Investment Plan(s)',
 

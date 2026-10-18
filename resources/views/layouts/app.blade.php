@@ -28,6 +28,8 @@
         <link rel="stylesheet" href="{{ asset('dash/css/' . $theme) }}">
         <link rel="stylesheet" href="{{ asset('dash/css/customs.css') }}">
         <link rel="stylesheet" href="{{ asset('dash/css/style.css') }}">
+        <!-- AGROTRADE ADMIN POLISH PASS 1 -->
+        <link rel="stylesheet" href="{{ asset('dash/css/agrotrade-admin-polish.css') }}">
         {{-- <link rel="stylesheet" href="{{ asset('dash/css/atlantis.min.css') }}"> --}}
         <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.6.2/css/buttons.dataTables.min.css">
         <link rel="stylesheet" type="text/css"
