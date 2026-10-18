@@ -198,6 +198,14 @@ class AutoTaskController extends Controller
                 \Illuminate\Support\Facades\DB::transaction(function () use ($id, &$mailData) {
                     $trade = User_plans::whereKey($id)->lockForUpdate()->first();
                     if (!$trade || $trade->active !== 'yes' || !now()->greaterThan($trade->expire_date)) return;
+                    // Phase 2A: fail closed until controls exist; respect admin restrictions
+                    // inside the same transaction after locking the investment row.
+                    if (!\Illuminate\Support\Facades\Schema::hasTable('agrotrade_investment_controls')) return;
+                    if (\Illuminate\Support\Facades\DB::table('agrotrade_investment_controls')
+                        ->where('investment_type', 'modern')
+                        ->where('investment_id', $trade->id)
+                        ->where('state', '!=', 'active')
+                        ->exists()) return;
                     $user = User::whereKey($trade->user)->lockForUpdate()->first();
                     if (!$user) return;
                     $profitResult = $this->calculateTradingResult($trade);
